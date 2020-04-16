@@ -1,0 +1,4 @@
+name = "CondensedMatterSOS"
+uuid = "676dea7e-7535-42cf-a5c4-14732a6b7aba"
+authors = ["Benoît Legat <benoit.legat@gmail.com>"]
+version = "0.1.0"
