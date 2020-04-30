@@ -68,7 +68,7 @@ const MP = MultivariatePolynomials
 #     return term.coefficient
 # end
 #
-
+include("types.jl")
 function MP.name_base_indices(var::SpinVariable) # Used to print variable
     splits = split(NAMES[var.id], r"[\[,\]]\s*", keepempty=false)
     suffix = ("ˣ", "ʸ", "ᶻ")[var.index + 1]
@@ -80,8 +80,8 @@ function MP.name_base_indices(var::SpinVariable) # Used to print variable
     end
 end
 
-include(types.jl)
-include(operators.jl)
+
+include("operators.jl")
 
 # function Base.:*(a::SpinVariable, b::SpinVariable)
 #     if a.id == b.id
@@ -292,5 +292,5 @@ end
 # B == sigmax[1]*sigmax[2]
 # C == sigmax[3]*sigmay[4]
 
-
+export @spin
 end # module

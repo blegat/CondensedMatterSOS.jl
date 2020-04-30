@@ -29,7 +29,6 @@ end
 
 
 function Base.:*(b::SpinTerm,a::SpinVariable)
-    println("term*variables");
     return a*b;
 end
 function Base.:*(a::SpinVariable, b::SpinTerm)
@@ -41,7 +40,6 @@ end
 function Base.:*(a::SpinVariable, b::SpinMonomial)
     c = deepcopy(b);
     if in(a.id,keys(b.variables))
-        println("DENTRO IF")
         delete!(c.variables,a.id);
         site_mult = b.variables[a.id]*a; #var*var=term or Bool;
         if typeof(site_mult) == Bool
@@ -50,7 +48,6 @@ function Base.:*(a::SpinVariable, b::SpinMonomial)
         push!(c.variable, a.id=>monomial(site_mult)[a.id]);
         return SpinTerm(coefficient(site_mult), c);
     else
-        println("DENTRO ELSE")
         push!(c.variables, a.id=>a);
         return c;
     end
@@ -86,14 +83,12 @@ function Base.:*(b::SpinTerm,a::Number)
     return a*b;
 end
 function Base.:*(a::Number,b::SpinTerm)
-    println("int*term")
     return SpinTerm(a*coefficient(b), monomial(b));
 end
 function Base.:*(b::SpinMonomial,a::Number)
     return a*b;
 end
 function Base.:*(a::Number,b::SpinMonomial)
-    println("int*term")
     return SpinTerm(a, b);
 end
 function Base.:*(b::SpinTerm,a::SpinMonomial)

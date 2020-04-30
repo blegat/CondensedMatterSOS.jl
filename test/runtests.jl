@@ -2,25 +2,25 @@ using MultivariatePolynomials
 using Test
 using CondensedMatterSOS
 
+const CMS = CondensedMatterSOS;
+
 @spin sigma[1:4];
 
-A = sigmax[1];
+
+A = -im*7*sigmax[2]*sigmaz[3];
 B = sigmax[1]*sigmax[2];
-C = sigmax[3]*sigmax[4];
+C = sigmax[3]*sigmay[4];
 D = 3*sigmax[1]*sigmax[2];
-E = 4*sigmax[3]*sigmax[4];
+
 @testset "unsorted" begin
     @test A==A
     @test C==C
 
-    @test A = -im*7*sigmax[2]*sigmaz[3];
-    @test B = sigmax[1]*sigmax[2];
-    @test C = sigmax[3]*sigmay[4];
-    @test D = 3*sigmax[1]*sigmax[2];
+
 
     @test sigmax[1]*sigmax[1] == true
     @test sigmax[2]*sigmax[2] == true
-    @test typeof(sigmax[1]*sigmax[2]) == SpinMonomial
+    @test typeof(sigmax[1]*sigmax[2]) == CMS.SpinMonomial
     @test variables((sigmax[1]*sigmax[2])) == [sigmax[1], sigmax[2]]
     @test sigmax[1]*sigmay[1] == im*sigmaz[1]
     @test sigmay[1]*sigmax[1] == -im*sigmaz[1]
