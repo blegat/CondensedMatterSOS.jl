@@ -1,4 +1,3 @@
-
 function Base.:*(a::SpinVariable, b::SpinVariable)
     if a.id == b.id
         if a.index == b.index
@@ -21,93 +20,49 @@ function Base.:*(a::SpinVariable, b::SpinVariable)
     end
 end
 
-
-function Base.:*(n::Number,spin::SpinVariable)
-    return SpinTerm(n,SpinMonomial([spin]))
+function var_op!(op::Function, m::SpinMonomial, variable::SpinVariable)
+    site = variable.id
+    m_variable = get(m.variables, site, nothing)
+    if m_variable === nothing
+        coef = true
+        m.variables[site] = variable
+    else
+        term = op(m_variable, variable) # It is either a `Term` or a `Bool`
+        if term isa SpinTerm
+            coef = coefficient(term)
+            m.variables[site] = first(variables(term))
+        else
+            coef = term
+            delete!(m.variables, site)
+        end
+    end
+    return coef
 end
 
-
-
-function Base.:*(b::SpinTerm,a::SpinVariable)
-    return a*b;
-end
-function Base.:*(a::SpinVariable, b::SpinTerm)
-    return coefficient(b)*(a*monomial(b));
-end
 function Base.:*(a::SpinMonomial, b::SpinVariable)
-    return b*a;
+    c = deepcopy(a)
+    coef = var_op!(*, c, b)
+    return coef * c
 end
 function Base.:*(a::SpinVariable, b::SpinMonomial)
-    c = deepcopy(b);
-    if in(a.id,keys(b.variables))
-        delete!(c.variables,a.id);
-        site_mult = b.variables[a.id]*a; #var*var=term or Bool;
-        if typeof(site_mult) == Bool
-            return c;
-        end
-        push!(c.variable, a.id=>monomial(site_mult)[a.id]);
-        return SpinTerm(coefficient(site_mult), c);
-    else
-        push!(c.variables, a.id=>a);
-        return c;
-    end
+    c = deepcopy(b)
+    coef = var_op!((x, y) -> y * x, c, a)
+    return coef * c
 end
-
 
 function Base.:*(a::SpinMonomial, b::SpinMonomial)
     c = deepcopy(a)
     coef = true
-    for (site, variable) in b.variables
-        c_variable = get(c.variables, site, nothing)
-        if c_variable === nothing
-            c.variables[site] = variable
-        else
-            term = c_variable * variable # It is either a `Term` or a `Bool`
-            if term isa SpinTerm
-                coef *= coefficient(term)
-                c.variables[site] = first(variables(term))
-            else
-                coef *= term
-                delete!(c.variables, site)
-            end
-        end
+    for variable in values(b.variables)
+        coef *= var_op!(*, c, variable)
     end
     return coef * c
 end
-function Base.:*(b::SpinTerm,a::Number)
-    return a*b;
-end
-function Base.:*(a::Number,b::SpinTerm)
-    return SpinTerm(a*coefficient(b), monomial(b));
-end
-function Base.:*(b::SpinMonomial,a::Number)
-    return a*b;
-end
-function Base.:*(a::Number,b::SpinMonomial)
-    return SpinTerm(a, b);
-end
-function Base.:*(b::SpinTerm,a::SpinMonomial)
-    return a*b;
-end
-function Base.:*(a::SpinMonomial, b::SpinTerm)
-    return coefficient(b)*(a*monomial(b))
-end
-function Base.:*(a::SpinTerm, b::SpinTerm)
-    return (coefficient(a)*coefficient(b))*(monomial(a)*monomial(b));
-end
+MP.multconstant(α, m::SpinMonomial) = SpinTerm(α, m)
+MP.multconstant(m::SpinMonomial, α) = SpinTerm(α, m)
 function Base.:(==)(a::SpinVariable, b::SpinVariable)
-    return (a.id==b.id)&&(a.index==b.index)
+    return (a.id==b.id) && (a.index==b.index)
 end
 function Base.:(==)(a::SpinMonomial, b::SpinMonomial)
-    return a.variables==b.variables;
-end
-function Base.:(==)(a::SpinTerm, b::SpinTerm)
-    return (a.monomial==b.monomial)&&(a.coefficient==b.coefficient);
-end
-function Base.:(==)(b::SpinTerm, a::SpinMonomial)
-    return a==b;
-end
-function Base.:(==)(a::SpinMonomial,b::SpinTerm)
-    c = isone(coefficient(b));
-    return c&&(a==monomial(b));
+    return a.variables == b.variables
 end
