@@ -55,29 +55,24 @@ end
 
 
 function Base.:*(a::SpinMonomial, b::SpinMonomial)
-    c = deepcopy(a);
-    sites_a = keys(a.variables);
-    sites_b = keys(b.variables);
-    same_sites = intersect(sites_a,sites_b);
-    sda = setdiff(sites_a,sites_b);
-    sdb = setdiff(sites_b,sites_a);
-    for (site) in sdb
-        push!(c.variables, site=>b.variables[site]);
-    end
-    if isempty(same_sites)
-        return c;
-    else
-    coeff = 1;
-        for (site) in (same_sites)
-            delete!(c.variables, site)
-            temp_term = a.variables[site]*b.variables[site]; #term or Bool
-            if typeof(temp_term) != Bool
-                coeff = coeff*coefficient(temp_term);
-                push!(c.variables, site=>variables(monomial(temp_term))[1])
+    c = deepcopy(a)
+    coef = true
+    for (site, variable) in b.variables
+        c_variable = get(c.variables, site, nothing)
+        if c_variable === nothing
+            c.variables[site] = variable
+        else
+            term = c_variable * variable # It is either a `Term` or a `Bool`
+            if term isa SpinTerm
+                coef *= coefficient(term)
+                c.variables[site] = first(variables(term))
+            else
+                coef *= term
+                delete!(c.variables, site)
             end
         end
-        return coeff*c;
     end
+    return coef * c
 end
 function Base.:*(b::SpinTerm,a::Number)
     return a*b;

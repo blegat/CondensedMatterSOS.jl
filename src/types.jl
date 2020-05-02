@@ -40,13 +40,7 @@ function MP.exponents(spin::SpinMonomial)
        return ones(Int, length(spin.variables))
 end
 
-function MP.variables(spin::SpinMonomial)
-    var = [];
-    for (key,value) in spin.variables
-        push!(var,value)
-    end
-    return var;
-end
+MP.variables(spin::SpinMonomial) = values(spin.variables)
 
 struct SpinTerm{T} <: MP.AbstractTerm{T}
     coefficient::T
@@ -56,6 +50,7 @@ end
 function MP.monomial(term::SpinTerm)
     return term.monomial
 end
+MP.variables(term::SpinTerm) = MP.variables(MP.monomial(term))
 
 function MP.coefficient(term::SpinTerm)
     return term.coefficient
