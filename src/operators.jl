@@ -13,7 +13,7 @@ function Base.:*(a::SpinVariable, b::SpinVariable)
             elseif pos==1
                 return  -im*SpinVariable(a.id, mod(i+pos,3))
             else
-                error("not valid index")
+                error("Invalid `index` field for variables, we should have 0 <= `a.index`, `b.index` < 3.")
             end
         end
     else
