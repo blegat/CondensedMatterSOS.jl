@@ -18,8 +18,8 @@ D = 3*sigmax[1]*sigmax[2];
 
 
 
-    @test sigmax[1]*sigmax[1] == true
-    @test sigmax[2]*sigmax[2] == true
+    @test sigmax[1]*sigmax[1]
+    @test sigmax[2]*sigmax[2]
     @test typeof(sigmax[1]*sigmax[2]) == CMS.SpinMonomial
     @test variables((sigmax[1]*sigmax[2])) == [sigmax[1], sigmax[2]]
     @test sigmax[1]*sigmay[1] == im*sigmaz[1]
