@@ -38,6 +38,8 @@ function MP.exponents(spin::SpinMonomial)
 
        #There must be a 1to1 corresponendence between variables and exponents
        return ones(Int, length(spin.variables))
+   # TODO It would be cheaper to return `FillArrays.Ones{Int}(length(spin.variables))`.
+   #      but this is currently blocked by https://github.com/JuliaArrays/FillArrays.jl/issues/96
 end
 
 MP.variables(spin::SpinMonomial) = values(spin.variables)
