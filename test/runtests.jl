@@ -17,6 +17,11 @@ D = 3*sigmax[1]*sigmax[2];
     @test C==C
     @test sigmax[1]*sigmax[2]==sigmax[2]*sigmax[1]
     @test sigmax[3] * B == B * sigmax[3]
+
+    @test A*sigmax[1]*sigmax[1] == A
+    @test sigmay[2]*sigmax[1]*sigmax[1] == sigmay[2]
+    @test A*sigmax[1]*sigmax[1] == A
+    @test B == D/3
 end
 
 @testset "single site" begin

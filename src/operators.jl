@@ -66,3 +66,61 @@ end
 function Base.:(==)(a::SpinMonomial, b::SpinMonomial)
     return a.variables == b.variables
 end
+
+function Base.:(==)(term1::SpinTerm{T}, term2::SpinTerm{T}) where T
+    # TODO? Probably there should be a function which gives .coefficient
+    # and .index in case the struct field name changes
+    coeff1, coeff2 = term1.coefficient, term2.coefficient
+    if coeff1 != coeff2
+        return false
+    else
+        mon1, mon2 = term1.monomial, term2.monomial
+        return mon1 == mon2
+    end
+end
+
+function Base.:(==)(var::SpinVariable, term::SpinTerm{T}) where T
+    # NOTE that 1*ax and ax are different types. One is SpinVariable{Int64}
+    # and the other is SpinVarible. Also note that ax*bx*bx=ax is of type
+    # SpinVariable{bool}.
+    if term.coefficient == 1
+        return var == term.monomial
+    else
+        return false
+    end
+end
+
+function Base.:(==)(term::SpinTerm{T}, var::SpinVariable) where T
+    return var == term
+end
+
+function Base.:(==)(var::SpinVariable, mon::SpinMonomial)
+    # If there is more than one SpinVariable in SpinMonomial then they are
+    # unequal
+    if length(mon.variables) > 1
+        return false
+    else
+        # TODO Better way of finding the first key to compare the el of Dic?
+        # Either do what I did and get the first key, or upgrade var to a
+        # dictionary and then we can just use the method fo comparing
+        # .variables field
+        first_key = collect(keys(mon.variables))[1]
+        return var == mon.variables[first_key]
+    end
+end
+
+function Base.:(==)(mon::SpinMonomial, var::SpinVariable)
+    return var == mon
+end
+
+function Base.:(==)(mon::SpinMonomial, term::SpinTerm{T}) where T
+    if term.coefficient == 1
+        return mon == term.monomial
+    else
+        return false
+    end
+end
+
+function Base.:(==)(term::SpinTerm{T}, mon::SpinMonomial) where T
+    return mon == term
+end
