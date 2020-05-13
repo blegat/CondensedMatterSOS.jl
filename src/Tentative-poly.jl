@@ -2,6 +2,8 @@ struct SpinPolynomial{T} <: MP.AbstractPolynomial{T}
     terms::Vector{SpinTerm{T}}
 end
 MP.terms(p::SpinPolynomial) = p.terms
+
+###This must be in MP or not?
 monomialtype(::Type{<:Union{SpinVariable, SpinMonomial, SpinTerm, SpinPolynomial}}) = SpinMonomial
 
 #With this I solve 2*sx[1]<sx[1]
