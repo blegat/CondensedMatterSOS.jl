@@ -97,4 +97,5 @@ end
     @test   sigmay[2] * sigmaz[3] < sigmay[1] * sigmay[3]
     @test   sigmay[2] * sigmaz[3] < sigmay[1] * sigmay[3]
     @test   sigmay[2] * sigmaz[3] < sigmax[1] * sigmay[4]
+    @test !(sigmax[1] * sigmax[2] < sigmax[1] * sigmax[2])
 end

@@ -103,5 +103,5 @@ function Base.isless(a::SpinMonomial, b::SpinMonomial)
         pa = advance((dica, pa))
         pb = advance((dicb, pb))
     end
-    return true
+    return false
 end
