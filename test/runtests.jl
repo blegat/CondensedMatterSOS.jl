@@ -67,3 +67,15 @@ end
     @test B == sigmax[1]*sigmax[2]
     @test C == sigmax[3]*sigmay[4]
 end
+
+
+@testset "isless" begin
+    @test isless(sigmax[2],sigmax[1]) == true;
+    @test isless(sigmax[3],sigmax[4]) == false;
+    @test isless(sigmax[1],sigmay[1]) == false;
+    @test isless(sigmax[1]*sigmax[2],sigmax[2]) == false;
+    @test isless(sigmax[2]*sigmax[4],sigmax[1]) == false;
+    @test isless(sigmax[2]*sigmax[4],sigmax[1]*sigmax[2]) == true;
+    @test isless(sigmax[1]*sigmax[3],sigmax[4]*sigmax[1]) == false;
+    @test isless(sigmay[2]*sigmaz[3],sigmay[1]*sigmay[3]) == true;
+end

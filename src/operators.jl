@@ -66,3 +66,50 @@ end
 function Base.:(==)(a::SpinMonomial, b::SpinMonomial)
     return a.variables == b.variables
 end
+
+
+
+
+
+function Base.:isless(a::Bool,b::SpinVariable)
+    return true;
+end
+function Base.:isless(a::SpinVariable,b::Bool)
+    return false;
+end
+function Base.:isless(a::SpinVariable,b::SpinVariable)
+    if (a.id<b.id) || (a.index<b.index)
+        return false
+    end
+    return true;
+end
+function Base.:isless(a::SpinVariable,b::SpinMonomial)
+    if length(b.variables)>1
+        return false;
+    end
+    return isless(a,b.variables[1]);
+end
+function Base.:isless(b::SpinMonomial,a::SpinVariable)
+    return isless(a,b);
+end
+function Base.:isless(a::SpinMonomial,b::SpinMonomial)
+    dica = a.variables;
+    dicb = b.variables;
+    la = length(a.variables);
+    lb = length(b.variables);
+    if la!=lb
+        return la<lb;
+    end
+    pa = startof(dica);
+    pb = startof(dicb);
+    while pa!=pastendsemitoken(dica);
+        ka,va = deref((dica,pa))
+        kb,vb = deref((dicb,pb))
+        if (ka<kb) || ((ka==kb) && (va.index<vb.index))
+            return false;
+        end
+        pa = advance((dica,pa));
+        pb = advance((dicb,pb));
+    end
+    return true;
+end
