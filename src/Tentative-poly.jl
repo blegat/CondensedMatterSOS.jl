@@ -13,5 +13,7 @@ end
 
 #With this I solve sx[1]+sx[2]
 function MP.polynomial(vterm::Array{SpinTerm{T},1}, s::MP.SortedUniqState) where T
-    return SpinPolynomial(vterm);
+    return SpinPolynomial(vterm)
 end
+
+Base.promote_rule(::Type{SpinPolynomial{S}}, ::Type{SpinPolynomial{T}}) where {S, T} = SpinPolynomial{promote_type(S, T)}
