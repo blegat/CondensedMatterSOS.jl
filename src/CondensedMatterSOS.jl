@@ -293,5 +293,7 @@ end
 # B == sigmax[1]*sigmax[2]
 # C == sigmax[3]*sigmay[4]
 
+include("Tentative-poly.jl")
+
 export @spin
 end # module
