@@ -27,6 +27,7 @@ struct SpinMonomial <: MP.AbstractMonomial
     end
 end
 
+MP.isconstant(mono::SpinMonomial) = iszero(length(mono.variables))
 MP.monomial(spin::SpinVariable) = SpinMonomial([spin])
 function MP.exponents(spin::SpinMonomial)
        #  #Exponents is a vector long as the the biggest site index of the spin

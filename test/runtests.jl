@@ -70,12 +70,22 @@ end
 
 
 @testset "isless" begin
-    @test isless(sigmax[2],sigmax[1]) == true;
-    @test isless(sigmax[3],sigmax[4]) == false;
-    @test isless(sigmax[1],sigmay[1]) == false;
-    @test isless(sigmax[1]*sigmax[2],sigmax[2]) == false;
-    @test isless(sigmax[2]*sigmax[4],sigmax[1]) == false;
-    @test isless(sigmax[2]*sigmax[4],sigmax[1]*sigmax[2]) == true;
-    @test isless(sigmax[1]*sigmax[3],sigmax[4]*sigmax[1]) == false;
-    @test isless(sigmay[2]*sigmaz[3],sigmay[1]*sigmay[3]) == true;
+    @test   sigmax[2] < sigmax[1]
+    @test !(sigmax[1] < sigmax[1])
+    @test !(sigmax[1] < sigmay[1])
+    @test   sigmay[1] < sigmax[1]
+    @test !(sigmax[3] < sigmax[3])
+    @test !(sigmax[3] < sigmax[4])
+    @test !(sigmax[3] < sigmay[4])
+    @test !(sigmay[3] < sigmax[4])
+    @test   sigmax[4] < sigmax[3]
+    @test   sigmax[4] < sigmay[3]
+    @test   sigmay[4] < sigmax[3]
+    @test !(sigmax[1] * sigmax[2] < sigmax[2])
+    @test !(sigmax[2] * sigmax[4] < sigmax[1])
+    @test   sigmax[2] * sigmax[4] < sigmax[1] * sigmax[2]
+    @test !(sigmax[1] * sigmax[3] < sigmax[4] * sigmax[1])
+    @test   sigmay[2] * sigmaz[3] < sigmay[1] * sigmay[3]
+    @test   sigmay[2] * sigmaz[3] < sigmay[1] * sigmay[3]
+    @test   sigmay[2] * sigmaz[3] < sigmax[1] * sigmay[4]
 end
