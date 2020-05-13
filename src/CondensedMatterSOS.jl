@@ -69,7 +69,12 @@ const MP = MultivariatePolynomials
 # end
 #
 include("types.jl")
-include("promote.jl")
+
+# TODO remove when MP v0.3.9 is out
+function Base.convert(::Type{TT}, t::TT) where {T, TT <: AbstractTerm{T}}
+    return t
+end
+
 function MP.name_base_indices(var::SpinVariable) # Used to print variable
     splits = split(NAMES[var.id], r"[\[,\]]\s*", keepempty=false)
     suffix = ("ˣ", "ʸ", "ᶻ")[var.index + 1]
