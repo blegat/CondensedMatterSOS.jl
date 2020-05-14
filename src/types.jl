@@ -53,18 +53,14 @@ end
 
 MP.termtype(::Type{<:Union{SpinVariable, SpinMonomial, SpinTerm}}, T::Type) = SpinTerm{T}
 
-function MP.monomial(term::SpinTerm)
-    return term.monomial
-end
-MP.variables(term::SpinTerm) = MP.variables(MP.monomial(term))
-
-function MP.coefficient(term::SpinTerm)
-    return term.coefficient
+function spin_index(prefix::String, indices)
+    return spin(prefix * "[" * join(indices, ",") * "]")
 end
 
-# TODO this should be in MP
-Base.convert(::Type{SpinTerm{T}}, mono::SpinMonomial) where {T} = SpinTerm(one(T), mono)
-Base.convert(::Type{SpinTerm{T}}, t::SpinTerm) where {T} = SpinTerm(convert(T, coefficient(t)), monomial(t))
+function array_spin(prefix, indices...)
+    σs = map(i -> spin_index(prefix, i), Iterators.product(indices...))
+    return [σ[1] for σ in σs], [σ[2] for σ in σs], [σ[3] for σ in σs]
+end
 
 function build_spin(var)
     if isa(var, Symbol)
