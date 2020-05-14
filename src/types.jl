@@ -53,6 +53,15 @@ end
 
 MP.termtype(::Type{<:Union{SpinVariable, SpinMonomial, SpinTerm}}, T::Type) = SpinTerm{T}
 
+function spin_index(prefix::String, indices)
+    return spin(prefix * "[" * join(indices, ",") * "]")
+end
+
+function array_spin(prefix, indices...)
+    σs = map(i -> spin_index(prefix, i), Iterators.product(indices...))
+    return [σ[1] for σ in σs], [σ[2] for σ in σs], [σ[3] for σ in σs]
+end
+
 function build_spin(var)
     if isa(var, Symbol)
         σx = Symbol(string(var) * "x")
