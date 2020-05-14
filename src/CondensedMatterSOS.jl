@@ -16,6 +16,7 @@ end
 # Needed in Julia v1.0 to avoid clashin with promotion.jl:236.
 # See https://travis-ci.com/github/blegat/CondensedMatterSOS.jl/jobs/333686069
 Base.promote_rule(::Type{PT}, ::Type{Any}) where {PT<:MP.APL} = MP.promote_rule_constant(Any, PT)
+MP.promote_rule_constant(::Type{T}, ::Type{TT}) where {T, S, TT<:AbstractTerm{S}} = termtype(TT, promote_type(T, S))
 
 function MP.name_base_indices(var::SpinVariable) # Used to print variable
     splits = split(NAMES[var.id], r"[\[,\]]\s*", keepempty=false)
