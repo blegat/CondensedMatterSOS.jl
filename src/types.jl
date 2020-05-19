@@ -44,7 +44,7 @@ function MP.exponents(spin::SpinMonomial)
    #      but this is currently blocked by https://github.com/JuliaArrays/FillArrays.jl/issues/96
 end
 
-MP.variables(spin::SpinMonomial) = values(spin.variables)
+MP.variables(spin::SpinMonomial) = collect(values(spin.variables))
 
 struct SpinTerm{T} <: MP.AbstractTerm{T}
     coefficient::T

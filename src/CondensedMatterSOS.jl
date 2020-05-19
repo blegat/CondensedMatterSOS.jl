@@ -2,6 +2,7 @@ module CondensedMatterSOS
 
 using MultivariatePolynomials
 using DataStructures
+using Combinatorics
 
 const MP = MultivariatePolynomials
 include("types.jl")
@@ -33,6 +34,7 @@ end
 
 
 include("operators.jl")
+include("monom-set.jl")
 
 export @spin
 end # module

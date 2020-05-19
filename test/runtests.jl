@@ -101,3 +101,11 @@ end
     @test !(2 * sigmax[1] < sigmax[2])
     @test sigmax[1] < 2 * sigmax[1]
 end
+
+
+@testset "monomials" begin
+    @test all(CMS.monomials([sigmax[1],sigmax[2]],2).==[sigmax[1]*sigmax[2]])
+    @test all(CMS.monomials([sigmax[1],sigmay[1]],2).==[im*sigmaz[1],-im*sigmaz[1]])
+end
+
+=
