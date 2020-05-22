@@ -1,8 +1,9 @@
 function Base.:*(a::SpinVariable, b::SpinVariable)
     if a.id == b.id
         if a.index == b.index
-            return true # We want to return `1` but in which type ?
-                        # We use `Bool` type as it the type compatible with the most other types in Julia.
+            return 1 # We want to return `1` but in which type ?
+                     # We could use `Bool` type as it the type compatible with the most other types in Julia
+                     # but currently the convention is `Int` in MP, i.e. variables and monomials are `AbstractTerm{Int}`.
         else
             i = a.index
             j = b.index
@@ -10,7 +11,7 @@ function Base.:*(a::SpinVariable, b::SpinVariable)
             if pos==2
                 return  im*SpinVariable(a.id, mod(i+pos,3))
             elseif pos==1
-                return  -im*SpinVariable(a.id, mod(i+pos,3))
+                return -im*SpinVariable(a.id, mod(i+pos,3))
             else
                 error("Invalid `index` field for variables, we should have 0 <= `a.index`, `b.index` < 3.")
             end
@@ -24,7 +25,7 @@ function var_op!(op::Function, m::SpinMonomial, variable::SpinVariable)
     site = variable.id
     m_variable = get(m.variables, site, nothing)
     if m_variable === nothing
-        coef = true
+        coef = 1
         m.variables[site] = variable
     else
         term = op(m_variable, variable) # It is either a `Term` or a `Bool`
@@ -52,7 +53,7 @@ end
 
 function Base.:*(a::SpinMonomial, b::SpinMonomial)
     c = deepcopy(a)
-    coef = true
+    coef = 1
     for variable in values(b.variables)
         coef *= var_op!(*, c, variable)
     end
