@@ -69,7 +69,7 @@ function build_spin(var)
         σx = Symbol(string(var) * "x")
         σy = Symbol(string(var) * "y")
         σz = Symbol(string(var) * "z")
-        return [σx, σy, σz], :(($(esc(σx)), $(esc(σy)), $(esc(σz))) = spin($"$var"))
+        return var, :($(esc(var)) = ($(esc(σx)), $(esc(σy)), $(esc(σz))) = spin($"$var"))
     else
         isa(var, Expr) || error("Expected $var to be a variable name")
         Base.Meta.isexpr(var, :ref) || error("Expected $var to be of the form varname[idxset]")
@@ -79,7 +79,7 @@ function build_spin(var)
         σx = Symbol(prefix * "x")
         σy = Symbol(prefix * "y")
         σz = Symbol(prefix * "z")
-        return [σx, σy, σz], :(($(esc(σx)), $(esc(σy)), $(esc(σz))) = array_spin($prefix, $(esc.(var.args[2:end])...)))
+        return varname, :($(esc(varname)) = ($(esc(σx)), $(esc(σy)), $(esc(σz))) = array_spin($prefix, $(esc.(var.args[2:end])...)))
     end
 end
 
@@ -88,7 +88,7 @@ function build_spins(args)
     exprs = []
     for arg in args
         var, expr = build_spin(arg)
-        append!(vars, var)
+        push!(vars, var)
         push!(exprs, expr)
     end
     return vars, exprs
@@ -110,6 +110,9 @@ MP.terms(p::SpinPolynomial) = p.terms
 const SpinLike = Union{SpinVariable, SpinMonomial, SpinTerm, SpinPolynomial}
 MP.variable_union_type(::Union{SpinLike, Type{<:SpinLike}}) = SpinVariable
 MP.monomialtype(::Type{<:SpinLike}) = SpinMonomial
+function MP.constantmonomial(::Union{SpinLike, Type{<:SpinLike}})
+    return SpinMonomial(SpinVariable[])
+end
 
 # #With this I solve 2*sx[1]<sx[1]
 # function SpinTerm{T}(spin::Union{SpinVariable, SpinMonomial}) where T

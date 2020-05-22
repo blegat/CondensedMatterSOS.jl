@@ -117,8 +117,7 @@ end
 
 
 @testset "monomials" begin
-    @test all(CMS.monomials([sigmax[1],sigmax[2]],2).==[sigmax[1]*sigmax[2]])
-    @test all(CMS.monomials([sigmax[1],sigmay[1]],2).==[im*sigmaz[1],-im*sigmaz[1]])
+    @test CMS.monomials([sigmax[1], sigmax[2]], 0) == [1]
+    @test all(CMS.monomials([sigmax[1],sigmax[2]],2) .== [sigmax[1]*sigmax[2]])
+    @test all(CMS.monomials([sigmax[1],sigmay[1]],2) .== [im*sigmaz[1],-im*sigmaz[1]])
 end
-
-=
