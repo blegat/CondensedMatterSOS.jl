@@ -15,6 +15,41 @@ function monomials(vars::Vector{CondensedMatterSOS.SpinVariable}, deg::Int64)
     return unique(AA);
 end
 
+function _add_monomials!(monos, sites, current_mono, i, filter)
+    if i > length(sites)
+        if filter(current_mono)
+            push!(monos, current_mono)
+        end
+    else
+        for xyz in 0:2
+            var = SpinVariable(sites[i], xyz)
+            _add_monomials!(monos, sites, current_mono * var, i + 1, filter)
+        end
+    end
+end
+function _monomials(sites::Vector{Int}, deg::Int, filter::Function, monos)
+    for active_sites in combinations(sites, deg)
+        _add_monomials!(monos, active_sites, constantmonomial(SpinMonomial), 1, filter)
+    end
+    return monos
+end
+function _monomials(vars::Vector{SpinVariable}, deg::Int, filter::Function, monos)
+    sites = unique!(sort!(map(var -> var.id, vars)))
+    return _monomials(sites, deg, filter, monos)
+end
+
+function MP.monomials(vars::Vector{SpinVariable}, deg::Int, filter::Function = x -> true)
+    return _monomials(vars, deg, filter, SpinMonomial[])
+end
+
+function MP.monomials(vars::Vector{SpinVariable}, degs::AbstractVector{Int}, filter::Function = x -> true)
+    monos = SpinMonomial[]
+    for deg in sort(degs)
+        _monomials(vars, deg, filter, monos)
+    end
+    return monos
+end
+
 # # using CondensedMatterSOS
 # # function monomials(vars::Vector{CondensedMatterSOS.SpinVariable}, deg::Int64)
 # #
