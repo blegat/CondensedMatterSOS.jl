@@ -30,18 +30,19 @@ end
 MP.isconstant(mono::SpinMonomial) = iszero(length(mono.variables))
 MP.monomial(spin::SpinVariable) = SpinMonomial([spin])
 function MP.exponents(spin::SpinMonomial)
-       #  #Exponents is a vector long as the the biggest site index of the spin
-       #  exponents = zeros(Int, last(spin.variables)[1])
-       #  for (key,value) in spin.variables
-       #      #if the spin is actually present, exponent=1 that is the maximum
-       #      exponents[key] = 1;
-       #  end
-       # return exponents;
-
-       #There must be a 1to1 corresponendence between variables and exponents
-       return ones(Int, length(spin.variables))
+   #There must be a 1to1 corresponendence between variables and exponents
+   return ones(Int, length(spin.variables))
    # TODO It would be cheaper to return `FillArrays.Ones{Int}(length(spin.variables))`.
    #      but this is currently blocked by https://github.com/JuliaArrays/FillArrays.jl/issues/96
+end
+function MP.degree(spin::SpinMonomial, variable::SpinVariable)
+    var = get(spin.variables, variable.id, nothing)
+    return (var === nothing || var.index != variable.index) ? 0 : 1
+end
+function MP.powers(m::CondensedMatterSOS.SpinMonomial)
+    # TODO maybe use MappedArrays.jl here so that ẁe can hardcode the `eltype`
+    #      as `eltype(::Base.Generator)` is `Any`.
+    return Base.Generator(v -> (v, 1), variables(m))
 end
 
 MP.variables(spin::SpinMonomial) = values(spin.variables)
@@ -53,8 +54,9 @@ end
 
 MP.termtype(::Type{<:Union{SpinVariable, SpinMonomial, SpinTerm}}, T::Type) = SpinTerm{T}
 
+_spin_name(prefix::String, indices) = prefix * "[" * join(indices, ",") * "]"
 function spin_index(prefix::String, indices)
-    return spin(prefix * "[" * join(indices, ",") * "]")
+    return spin(_spin_name(prefix, indices))
 end
 
 function array_spin(prefix, indices...)
@@ -105,7 +107,9 @@ struct SpinPolynomial{T} <: MP.AbstractPolynomial{T}
 end
 MP.terms(p::SpinPolynomial) = p.terms
 
-MP.monomialtype(::Type{<:Union{SpinVariable, SpinMonomial, SpinTerm, SpinPolynomial}}) = SpinMonomial
+const SpinLike = Union{SpinVariable, SpinMonomial, SpinTerm, SpinPolynomial}
+MP.variable_union_type(::Union{SpinLike, Type{<:SpinLike}}) = SpinVariable
+MP.monomialtype(::Type{<:SpinLike}) = SpinMonomial
 
 # #With this I solve 2*sx[1]<sx[1]
 # function SpinTerm{T}(spin::Union{SpinVariable, SpinMonomial}) where T
