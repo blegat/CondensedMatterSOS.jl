@@ -14,16 +14,29 @@ D = 3*sigmax[1]*sigmax[2];
 
 @testset "show" begin
     @test sprint(show, A) == "(0 - 7im)sigmaˣ₂sigmaᶻ₃"
+    @test sprint(show, MIME"text/print"(), A) == "(0 - 7im)*sigmax[2]*sigmaz[3]"
     @test sprint(show, B) == "sigmaˣ₁sigmaˣ₂"
+    @test sprint(show, MIME"text/print"(), B) == "sigmax[1]*sigmax[2]"
     @test sprint(show, C) == "sigmaˣ₃sigmaʸ₄"
+    @test sprint(show, MIME"text/print"(), C) == "sigmax[3]*sigmay[4]"
     @test sprint(show, D) == "3sigmaˣ₁sigmaˣ₂"
+    @test sprint(show, MIME"text/print"(), D) == "3*sigmax[1]*sigmax[2]"
+end
+
+# test that in addition to `x == y`, we
+# have `isequal(x, y)` and they have equal hash.
+# Not that `0.0 == -0.0` but `!isequal(0.0, -0.0)` as they have a different hash.
+function test_isequal(x, y)
+    @test x == y
+    @test isequal(x, y)
+    @test hash(x) == hash(y)
 end
 
 @testset "equalities" begin
-    @test A==A
-    @test C==C
-    @test sigmax[1]*sigmax[2]==sigmax[2]*sigmax[1]
-    @test sigmax[3] * B == B * sigmax[3]
+    test_isequal(A, A)
+    test_isequal(C, C)
+    test_isequal(sigmax[1]*sigmax[2], sigmax[2]*sigmax[1])
+    test_isequal(sigmax[3] * B, B * sigmax[3])
 end
 
 @testset "single site" begin
