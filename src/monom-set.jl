@@ -1,39 +1,19 @@
-####This version returns all the monomials of degree deg with all the possible orders
-#```
-#E1. (sx[1],sx[2])->[sx[1]*sx[2],sx[2]*sx[1]];
-#```
-#```
-##E2. (sx[1],sy[1])->[sx[1]*sy[1],sy[1]*sx[1]];
-#```
-##unfortunately `unique()` does not work with `SpinMonomial` because `hash()` does not work on `SpinMonomial`
-##in order to make it work I had to redefine `MP.variables(spin::SpinMonomial) = values(spin.variables)`
-##to `MP.variables(spin::SpinMonomial) = collect(values(spin.variables))`, because just values return an iterator list
-##while MP.hash expect it to return a vector.
-##
-##It is possible that some product of variables return a smaller degree monomials. Should I return it?
-##```
-##E3. (sx[1]*sy[1])=im*sz[1]
-##```
-####-->not working with `unique([2*sx[1],sx[1]])`, because `hash()` does not work with SpinTerm because
-#### `variable_union_type()` does not work in with CondensedMatterSOS so I define
-function MP.variable_union_type(p::CondensedMatterSOS.SpinMonomial)
-    return SpinVariable
-end
-####and like this it should work
-using CondensedMatterSOS
-# using MultivariatePolynomials
+"""
+    monomials(vars::Vector{CondensedMatterSOS.SpinVariable}, deg::Int64)
+This version returns all the monomials of degree deg with all the possible orders
+```
+E1. (sx[1],sx[2])->[sx[1]*sx[2],sx[2]*sx[1]];
+```
+```
+E2. (sx[1],sy[1])->[sx[1]*sy[1],sy[1]*sx[1]];
+```
+"""
 function monomials(vars::Vector{CondensedMatterSOS.SpinVariable}, deg::Int64)
     CC = combinations(vars,deg)
     BB = permutations.(collect(Iterators.take(CC,length(CC))))
     AA = prod.(vcat(map(x->collect(Iterators.take(x,length(x))), vcat(BB...))...));
     return unique(AA);
 end
-##This work but now I cannot build the a vector like [im*sz[1],-im*sz[1]] because one element is
-##`CondensedMatterSOS.SpinTerm{Complex{Bool}}` and the other is
-##`CondensedMatterSOS.SpinTerm{Complex{Int64}}`
-##and it happens that `MethodError: promote_rule(::Type{CondensedMatterSOS.SpinTerm{Complex{Bool}}}, ::Type{CondensedMatterSOS.SpinTerm{Complex{Int64}}}) is ambiguous.`
-##Why the first is `Complex{Bool?}`
-####
 
 # # using CondensedMatterSOS
 # # function monomials(vars::Vector{CondensedMatterSOS.SpinVariable}, deg::Int64)
