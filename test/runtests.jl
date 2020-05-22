@@ -40,7 +40,7 @@ end
 end
 
 @testset "single site" begin
-    @test sigmax[1] * sigmax[1]
+    @test sigmax[1] * sigmax[1] == 1
     @test_throws ErrorException("Invalid `index` field for variables, we should have 0 <= `a.index`, `b.index` < 3.") sigmax[1] * CMS.SpinVariable(sigmax[1].id, 3)
 
     @test sigmax[1]*sigmay[1]==im*sigmaz[1];
@@ -67,8 +67,8 @@ end
 end
 
 @testset "monomials and terms" begin
-    @test sigmax[1]*sigmax[1]
-    @test sigmax[2]*sigmax[2]
+    @test sigmax[1]*sigmax[1] == 1
+    @test sigmax[2]*sigmax[2] == 1
 
     @test C*D==3*sigmax[1]*sigmax[2]*sigmax[3]*sigmay[4]
     @test C == sigmax[3]*sigmay[4]
@@ -113,4 +113,11 @@ end
     @test !(sigmax[1] * sigmax[2] < sigmax[1] * sigmax[2])
     @test !(2 * sigmax[1] < sigmax[2])
     @test sigmax[1] < 2 * sigmax[1]
+end
+
+
+@testset "monomials" begin
+    @test CMS.monomials([sigmax[1], sigmax[2]], 0) == [1]
+    @test all(CMS.monomials([sigmax[1],sigmax[2]],2) .== [sigmax[1]*sigmax[2]])
+    @test all(CMS.monomials([sigmax[1],sigmay[1]],2) .== [im*sigmaz[1],-im*sigmaz[1]])
 end

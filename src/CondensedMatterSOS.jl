@@ -2,23 +2,10 @@ module CondensedMatterSOS
 
 using MultivariatePolynomials
 using DataStructures
+using Combinatorics
 
 const MP = MultivariatePolynomials
 include("types.jl")
-
-# TODO remove when MP v0.3.9 is out
-function Base.convert(::Type{TT}, t::TT) where {T, TT <: AbstractTerm{T}}
-    return t
-end
-# Needed in Julia v1.0
-function Base.promote_rule(TT::Type{<:AbstractTerm{T}}, ST::Type{<:AbstractTermLike{S}}) where {S, T}
-    U = promote_type(S, T)
-    UT = termtype(ST, U)
-    if UT != termtype(TT, U)
-        error("Cannot promote `$ST` and `$TT` to the same type.")
-    end
-    return UT
-end
 
 # Used to print variable
 function _name_splits(var::SpinVariable, suffixes)
@@ -46,6 +33,7 @@ end
 
 
 include("operators.jl")
+include("monom-set.jl")
 
 export @spin
 end # module
