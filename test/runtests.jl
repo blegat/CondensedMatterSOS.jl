@@ -6,7 +6,6 @@ const CMS = CondensedMatterSOS;
 
 @spin sigma[1:4];
 
-
 A = -im*7*sigmax[2]*sigmaz[3];
 B = sigmax[1]*sigmax[2];
 C = sigmax[3]*sigmay[4];

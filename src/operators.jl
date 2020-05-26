@@ -91,6 +91,13 @@ function Base.isless(a::SpinMonomial, b::SpinMonomial)
     lb = length(b.variables)
     if la != lb
         return la < lb
+function MP.variable(mon::SpinMonomial)
+    if isone(length(mon.variables))
+        return first(values(mon.variables))
+    else
+        MP._errormono2var()
+    end
+end
     end
     pa = startof(dica)
     pb = startof(dicb)
