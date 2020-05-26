@@ -6,7 +6,6 @@ const CMS = CondensedMatterSOS;
 
 @spin sigma[1:4];
 
-
 A = -im*7*sigmax[2]*sigmaz[3];
 B = sigmax[1]*sigmax[2];
 C = sigmax[3]*sigmay[4];
@@ -20,7 +19,6 @@ D = 3*sigmax[1]*sigmax[2];
 
     @test A*sigmax[1]*sigmax[1] == A
     @test sigmay[2]*sigmax[1]*sigmax[1] == sigmay[2]
-    @test A*sigmax[1]*sigmax[1] == A
     @test B == D/3
 end
 
