@@ -52,6 +52,9 @@ struct SpinTerm{T} <: MP.AbstractTerm{T}
     monomial::SpinMonomial
 end
 
+# TODO move to MP
+MP.convertconstant(::Type{SpinTerm{T}}, α) where {T} = convert(T, α) * constantmonomial(SpinTerm{T})
+
 _spin_name(prefix::String, indices) = prefix * "[" * join(indices, ",") * "]"
 function spin_index(prefix::String, indices)
     return spin(_spin_name(prefix, indices))

@@ -131,6 +131,7 @@ end
 
 
 @testset "monomials" begin
+    @test monovec([1, sigmax[1], sigmax[2]]) == [sigmax[1], sigmax[2], 1]
     @test monomials([sigmax[1], sigmax[2]], 0) == [1]
     @test CMS.monomials([sigmax[1], sigmax[2]], 0) == [1]
     @test all(monomials([sigmax[1], sigmax[2]], 2) .== [CMS.SpinVariable(sigmax[1].id, i) * CMS.SpinVariable(sigmax[2].id, j) for i in 0:2 for j in 0:2])
