@@ -109,6 +109,17 @@ end
 MP.terms(p::SpinPolynomial) = p.terms
 MP.zero(::Type{SpinPolynomial{T}}) where {T} = SpinPolynomial(SpinTerm{T}[])
 
+# TODO move to MP
+function MP.polynomial(m::Union{SpinMonomial, SpinVariable}, T::Type)
+    return MP.polynomial(one(T) * m, T)
+end
+function MP.polynomial(t::SpinTerm{T}, ::Type{T}) where T
+    return SpinPolynomial([t])
+end
+function MP.polynomial(t::SpinTerm, T::Type)
+    return MP.polynomial(MP.changecoefficienttype(t, T), T)
+end
+
 const SpinLike = Union{SpinVariable, SpinMonomial, SpinTerm, SpinPolynomial}
 MP.variable_union_type(::Union{SpinLike, Type{<:SpinLike}}) = SpinVariable
 MP.monomialtype(::Type{<:SpinLike}) = SpinMonomial
@@ -116,6 +127,7 @@ function MP.constantmonomial(::Union{SpinLike, Type{<:SpinLike}})
     return SpinMonomial(SpinVariable[])
 end
 MP.termtype(::Union{SpinLike, Type{<:SpinLike}}, T::Type) = SpinTerm{T}
+MP.polynomialtype(::Union{SpinLike, Type{<:SpinLike}}, T::Type) = SpinPolynomial{T}
 
 # #With this I solve 2*sx[1]<sx[1]
 # function SpinTerm{T}(spin::Union{SpinVariable, SpinMonomial}) where T

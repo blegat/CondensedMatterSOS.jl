@@ -129,6 +129,11 @@ end
     @test sigmax[1] < 2 * sigmax[1]
 end
 
+@testset "matvec" begin
+    v = sigmax[1:2]
+    @test v' * ones(2, 2) * v == 2sigmax[1]*sigmax[2] + 2
+    @test v' * ones(Int, 2, 2) * v == 2sigmax[1]*sigmax[2] + 2
+end
 
 @testset "monomials" begin
     @test monovec([1, sigmax[1], sigmax[2]]) == [sigmax[1], sigmax[2], 1]
