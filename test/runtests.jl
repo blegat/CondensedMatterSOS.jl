@@ -89,6 +89,20 @@ end
     @test C == sigmax[3]*sigmay[4]
 end
 
+@testset "Polynomials" begin
+    function test_equal(a, b)
+        @test iszero(a + (-b))
+        @test iszero((-a) + b)
+        @test iszero(b + -a)
+        @test iszero((-b) + a)
+        @test iszero(b - a)
+        @test iszero(a - b)
+        @test a == b
+    end
+    test_equal(-sigmax[1] * sigmax[2] - sigmax[2] * sigmax[1], -2sigmax[1] * sigmax[2])
+    test_equal(sum(sigmaz), sigmaz[1] + sigmaz[2] + sigmaz[3] + sigmaz[4])
+end
+
 
 @testset "isless" begin
     @test   sigmax[2] < sigmax[1]

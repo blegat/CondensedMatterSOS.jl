@@ -52,8 +52,6 @@ struct SpinTerm{T} <: MP.AbstractTerm{T}
     monomial::SpinMonomial
 end
 
-MP.termtype(::Type{<:Union{SpinVariable, SpinMonomial, SpinTerm}}, T::Type) = SpinTerm{T}
-
 _spin_name(prefix::String, indices) = prefix * "[" * join(indices, ",") * "]"
 function spin_index(prefix::String, indices)
     return spin(_spin_name(prefix, indices))
@@ -106,6 +104,7 @@ struct SpinPolynomial{T} <: MP.AbstractPolynomial{T}
     terms::Vector{SpinTerm{T}}
 end
 MP.terms(p::SpinPolynomial) = p.terms
+MP.zero(::Type{SpinPolynomial{T}}) where {T} = SpinPolynomial(SpinTerm{T}[])
 
 const SpinLike = Union{SpinVariable, SpinMonomial, SpinTerm, SpinPolynomial}
 MP.variable_union_type(::Union{SpinLike, Type{<:SpinLike}}) = SpinVariable
@@ -113,6 +112,7 @@ MP.monomialtype(::Type{<:SpinLike}) = SpinMonomial
 function MP.constantmonomial(::Union{SpinLike, Type{<:SpinLike}})
     return SpinMonomial(SpinVariable[])
 end
+MP.termtype(::Union{SpinLike, Type{<:SpinLike}}, T::Type) = SpinTerm{T}
 
 # #With this I solve 2*sx[1]<sx[1]
 # function SpinTerm{T}(spin::Union{SpinVariable, SpinMonomial}) where T

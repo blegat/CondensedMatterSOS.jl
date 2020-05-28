@@ -4,6 +4,9 @@ using MultivariatePolynomials
 using DataStructures
 using Combinatorics
 
+import MutableArithmetics
+const MA = MutableArithmetics
+
 const MP = MultivariatePolynomials
 include("types.jl")
 
@@ -31,6 +34,8 @@ function MP.name_base_indices(var::SpinVariable) # Used to print variable
     end
 end
 
+include("sequences.jl")
+import .Sequences
 
 include("operators.jl")
 include("monom-set.jl")

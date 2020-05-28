@@ -28,7 +28,7 @@ function var_op!(op::Function, m::SpinMonomial, variable::SpinVariable)
         coef = 1
         m.variables[site] = variable
     else
-        term = op(m_variable, variable) # It is either a `Term` or a `Bool`
+        term = op(m_variable, variable) # It is either a `SpinTerm` or an `Int`
         if term isa SpinTerm
             coef = coefficient(term)
             m.variables[site] = first(variables(term))
@@ -106,3 +106,15 @@ function Base.isless(a::SpinMonomial, b::SpinMonomial)
     end
     return false
 end
+
+combine(t1::SpinTerm, t2::SpinTerm) = (coefficient(t1) + coefficient(t2)) * monomial(t1)
+function MA.promote_operation(::typeof(combine), ::Type{SpinTerm{S}}, ::Type{SpinTerm{T}}) where {S, T}
+    return SpinTerm{MA.promote_operation(+, S, T)}
+end
+compare(t1::SpinTerm, t2::SpinTerm) = monomial(t1) > monomial(t2)
+
+# TODO taken from TypedPolynomials
+jointerms(terms1::AbstractArray{<:SpinTerm}, terms2::AbstractArray{<:SpinTerm}) = Sequences.mergesorted(terms1, terms2, compare, combine)
+
+Base.:+(p1::SpinPolynomial, p2::SpinPolynomial) = SpinPolynomial(jointerms(terms(p1), terms(p2)))
+Base.:-(p1::SpinPolynomial, p2::SpinPolynomial) = SpinPolynomial(jointerms(terms(p1), (-).(terms(p2))))
