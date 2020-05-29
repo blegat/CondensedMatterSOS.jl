@@ -67,14 +67,10 @@ function Base.:(==)(a::SpinMonomial, b::SpinMonomial)
     return a.variables == b.variables
 end
 
-function Base.:(==)(var::SpinVariable, term::SpinTerm{T}) where T
-    if isone(coefficient(term))
-        return var == term.monomial
+function MP.variable(mon::SpinMonomial)
+    if isone(length(mon.variables))
+        return first(values(mon.variables))
     else
-        return false
+        MP._errormono2var()
     end
-end
-
-function Base.:(==)(term::SpinTerm{T}, var::SpinVariable) where T
-    return var == term
 end
