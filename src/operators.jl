@@ -94,6 +94,9 @@ function Base.isless(a::SpinMonomial, b::SpinMonomial)
 function MP.variable(mon::SpinMonomial)
     if isone(length(mon.variables))
         return first(values(mon.variables))
+function MP.variable(mon::SpinMonomial)
+    if isone(length(mon.variables))
+        return first(values(mon.variables))
     else
         MP._errormono2var()
     end
