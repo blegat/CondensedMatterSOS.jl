@@ -19,8 +19,8 @@ D = 3*sigmax[1]*sigmax[2];
     @test sprint(show, MIME"text/print"(), B) == "sigmax[1]*sigmax[2]"
     @test sprint(show, C) == "sigmaˣ₃sigmaʸ₄"
     @test sprint(show, MIME"text/print"(), C) == "sigmax[3]*sigmay[4]"
-    @test sprint(show, D) == "3sigmaˣ₁sigmaˣ₂"
-    @test sprint(show, MIME"text/print"(), D) == "3*sigmax[1]*sigmax[2]"
+    @test sprint(show, D) == "(3 + 0im)sigmaˣ₁sigmaˣ₂"
+    @test sprint(show, MIME"text/print"(), D) == "(3 + 0im)*sigmax[1]*sigmax[2]"
 end
 
 # test that in addition to `x == y`, we
@@ -62,7 +62,9 @@ end
 
 
 @testset "unsorted" begin
-    @test typeof(sigmax[1]*sigmax[2]) == CMS.SpinMonomial
+    @test sigmax[1]*sigmax[2] isa CMS.SpinTerm{Complex{Int}}
+    m = constantmonomial(sigmax[1])
+    @test m * m isa CMS.SpinTerm{Complex{Int}}
     @test collect(variables((sigmax[1]*sigmax[2]))) == [sigmax[1], sigmax[2]]
 end
 
@@ -129,10 +131,17 @@ end
     @test sigmax[1] < 2 * sigmax[1]
 end
 
-@testset "matvec" begin
-    v = sigmax[1:2]
-    @test v' * ones(2, 2) * v == 2sigmax[1]*sigmax[2] + 2
-    @test v' * ones(Int, 2, 2) * v == 2sigmax[1]*sigmax[2] + 2
+using LinearAlgebra
+@testset "matvec with $v" for v in (sigmax[1:2], [1, sigmax[1]], [sigmax[1], sigmay[1]])
+    exp = v[1]*v[2] + v[2]*v[1] + v[1]^2 + v[2]^2
+    @test v' * ones(2, 2) * v == exp
+    @test v' * ones(Int, 2, 2) * v == exp
+    vv = v * v'
+    @test vv isa Matrix{CMS.SpinTerm{Complex{Int}}}
+    @test dot(vv, ones(2, 2)) == exp
+    @test dot(vv, ones(Int, 2, 2)) == exp
+    @test sum(vv .* ones(2, 2)) == exp
+    @test sum(vv .* ones(Int, 2, 2)) == exp
 end
 
 @testset "monomials" begin

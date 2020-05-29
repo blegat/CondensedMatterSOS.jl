@@ -119,6 +119,9 @@ end
 function MP.polynomial(t::SpinTerm, T::Type)
     return MP.polynomial(MP.changecoefficienttype(t, T), T)
 end
+function MP.polynomial(p::SpinPolynomial, T::Type)
+    return SpinPolynomial(MP.changecoefficienttype.(terms(p), T))
+end
 
 const SpinLike = Union{SpinVariable, SpinMonomial, SpinTerm, SpinPolynomial}
 MP.variable_union_type(::Union{SpinLike, Type{<:SpinLike}}) = SpinVariable
@@ -133,6 +136,5 @@ MP.polynomialtype(::Union{SpinLike, Type{<:SpinLike}}, T::Type) = SpinPolynomial
 # function SpinTerm{T}(spin::Union{SpinVariable, SpinMonomial}) where T
 #     return SpinTerm(one(T),monomial(spin))
 # end
-#
-#With this I solve sx[1]+sx[2]
-MP.polynomial(vterm::Array{SpinTerm{T},1}, s::MP.SortedUniqState) where T = SpinPolynomial{T}(vterm)
+MP.polynomial(terms::Vector{SpinTerm{T}}, ::MP.SortedUniqState) where {T} = SpinPolynomial{T}(terms)
+MP.polynomial!(terms::Vector{SpinTerm{T}}, ::MP.SortedUniqState) where {T} = SpinPolynomial{T}(terms)

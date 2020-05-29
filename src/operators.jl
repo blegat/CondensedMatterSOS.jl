@@ -1,23 +1,27 @@
+function _coef_variable(a::SpinVariable, b::SpinVariable)
+    i = a.index
+    j = b.index
+    pos = mod(i - j, 3)
+    if pos == 2
+        return 1im, SpinVariable(a.id, mod(i+pos,3))
+    elseif pos == 1
+        return -im, SpinVariable(a.id, mod(i+pos,3))
+    else
+        error("Invalid `index` field for variables, we should have 0 <= `a.index`, `b.index` < 3.")
+    end
+end
 function Base.:*(a::SpinVariable, b::SpinVariable)
     if a.id == b.id
         if a.index == b.index
-            return 1 # We want to return `1` but in which type ?
-                     # We could use `Bool` type as it the type compatible with the most other types in Julia
-                     # but currently the convention is `Int` in MP, i.e. variables and monomials are `AbstractTerm{Int}`.
+            return (1 + 0im) * constantmonomial(a)
+            # We want to return `1` but in which type ?
+            # We could use `Bool` type as it the type compatible with the most other types in Julia
+            # but currently the convention is `Int` in MP, i.e. variables and monomials are `AbstractTerm{Int}`.
         else
-            i = a.index
-            j = b.index
-            pos = mod(i-j,3);
-            if pos==2
-                return  im*SpinVariable(a.id, mod(i+pos,3))
-            elseif pos==1
-                return -im*SpinVariable(a.id, mod(i+pos,3))
-            else
-                error("Invalid `index` field for variables, we should have 0 <= `a.index`, `b.index` < 3.")
-            end
+            return prod(_coef_variable(a, b))
         end
     else
-        SpinMonomial([a,b]);
+        return (1 + 0im) * SpinMonomial([a, b])
     end
 end
 
@@ -25,16 +29,14 @@ function var_op!(op::Function, m::SpinMonomial, variable::SpinVariable)
     site = variable.id
     m_variable = get(m.variables, site, nothing)
     if m_variable === nothing
-        coef = 1
+        coef = 1 + 0im
         m.variables[site] = variable
     else
-        term = op(m_variable, variable) # It is either a `SpinTerm` or an `Int`
-        if term isa SpinTerm
-            coef = coefficient(term)
-            m.variables[site] = first(variables(term))
-        else
-            coef = term
+        if m_variable.index == variable.index
+            coef = 1 + 0im
             delete!(m.variables, site)
+        else
+            coef, m.variables[site] = op(m_variable, variable)
         end
     end
     return coef
@@ -42,20 +44,20 @@ end
 
 function Base.:*(a::SpinMonomial, b::SpinVariable)
     c = deepcopy(a)
-    coef = var_op!(*, c, b)
+    coef = var_op!(_coef_variable, c, b)
     return coef * c
 end
 function Base.:*(a::SpinVariable, b::SpinMonomial)
     c = deepcopy(b)
-    coef = var_op!((x, y) -> y * x, c, a)
+    coef = var_op!((x, y) -> _coef_variable(y, x), c, a)
     return coef * c
 end
 
 function Base.:*(a::SpinMonomial, b::SpinMonomial)
     c = deepcopy(a)
-    coef = 1
+    coef = 1 + 0im
     for variable in values(b.variables)
-        coef *= var_op!(*, c, variable)
+        coef *= var_op!(_coef_variable, c, variable)
     end
     return coef * c
 end
