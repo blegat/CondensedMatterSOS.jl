@@ -91,16 +91,6 @@ function Base.isless(a::SpinMonomial, b::SpinMonomial)
     lb = length(b.variables)
     if la != lb
         return la < lb
-function MP.variable(mon::SpinMonomial)
-    if isone(length(mon.variables))
-        return first(values(mon.variables))
-function MP.variable(mon::SpinMonomial)
-    if isone(length(mon.variables))
-        return first(values(mon.variables))
-    else
-        MP._errormono2var()
-    end
-end
     end
     pa = startof(dica)
     pb = startof(dicb)
@@ -130,3 +120,11 @@ jointerms(terms1::AbstractArray{<:SpinTerm}, terms2::AbstractArray{<:SpinTerm}) 
 
 Base.:+(p1::SpinPolynomial, p2::SpinPolynomial) = SpinPolynomial(jointerms(terms(p1), terms(p2)))
 Base.:-(p1::SpinPolynomial, p2::SpinPolynomial) = SpinPolynomial(jointerms(terms(p1), (-).(terms(p2))))
+
+function MP.variable(mon::SpinMonomial)
+    if isone(length(mon.variables))
+        return first(values(mon.variables))
+    else
+        MP._errormono2var()
+    end
+end
