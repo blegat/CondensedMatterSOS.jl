@@ -120,3 +120,11 @@ jointerms(terms1::AbstractArray{<:SpinTerm}, terms2::AbstractArray{<:SpinTerm}) 
 
 Base.:+(p1::SpinPolynomial, p2::SpinPolynomial) = SpinPolynomial(jointerms(terms(p1), terms(p2)))
 Base.:-(p1::SpinPolynomial, p2::SpinPolynomial) = SpinPolynomial(jointerms(terms(p1), (-).(terms(p2))))
+
+function MP.variable(mon::SpinMonomial)
+    if isone(length(mon.variables))
+        return first(values(mon.variables))
+    else
+        MP._errormono2var()
+    end
+end
