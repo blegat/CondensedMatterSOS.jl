@@ -7,13 +7,6 @@ using CondensedMatterSOS
 
 Base.promote_rule(::Type{T}, ::Type{MOI.SingleVariable}) where {T<:Number} = MOI.ScalarAffineFunction{T}
 PolyJuMP.non_constant(a::Vector{<:MOI.AbstractFunction}) = a
-function MultivariatePolynomials.variables(monos::Vector{CondensedMatterSOS.SpinMonomial})
-    vars = Set{CondensedMatterSOS.SpinVariable}()
-    for mono in monos
-        union!(vars, variables(mono))
-    end
-    return sort(collect(vars), rev=true)
-end
 function Base.convert(::Type{MOI.ScalarAffineFunction{T}}, f::MOI.ScalarAffineFunction) where T
     return MOI.ScalarAffineFunction(
         [MOI.ScalarAffineTerm(convert(T, t.coefficient), t.variable_index) for t in f.terms],
@@ -23,8 +16,7 @@ end
 function MOI.Utilities.operate(::typeof(*), ::Type{Complex{Float64}}, a::Complex{Float64}, f::MOI.ScalarAffineFunction{Float64})
     MOI.Utilities.operate(*, Complex{Float64}, a, convert(MOI.ScalarAffineFunction{Complex{Float64}}, f))
 end
-MultivariatePolynomials.variables(p::CondensedMatterSOS.SpinPolynomial) = variables(monomials(p))
-Base.copy(t::CondensedMatterSOS.SpinTerm) = CondensedMatterSOS.SpinTerm(t.coefficient, t.monomial)
+
 Base.:*(f::MOI.ScalarAffineFunction{Complex{Float64}}, a::Number) = f * convert(Complex{Float64}, a)
 Base.:*(f::MOI.ScalarAffineFunction{Complex{Float64}}, a::Complex{Float64}) = MOI.Utilities.operate(*, Complex{Float64}, a, f)
 Base.:+(a::Int, f::MOI.ScalarAffineFunction{Complex{Float64}}) = convert(Complex{Float64}, a) + f
@@ -99,6 +91,7 @@ function function_string(::Type{JuMP.IJuliaMode}, v::MOI.VariableIndex, name = d
         return "noname"
     end
 end
+function_string(mode, func::MOI.SingleVariable) = function_string(mode, func.variable)
 # Whether something is zero or not for the purposes of printing it
 # oneunit is useful e.g. if coef is a Unitful quantity. The second `abs` is import if it is complex.
 _is_zero_for_printing(coef) = abs(coef) < 1e-10 * abs(oneunit(coef))
