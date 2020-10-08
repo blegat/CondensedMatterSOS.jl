@@ -109,14 +109,23 @@ function Base.isless(a::SpinMonomial, b::SpinMonomial)
     return false
 end
 
-combine(t1::SpinTerm, t2::SpinTerm) = (coefficient(t1) + coefficient(t2)) * monomial(t1)
-function MA.promote_operation(::typeof(combine), ::Type{SpinTerm{S}}, ::Type{SpinTerm{T}}) where {S, T}
+combine_plus(t1::SpinTerm, t2::SpinTerm) = (coefficient(t1) + coefficient(t2)) * monomial(t1)
+combine_minus(t1::SpinTerm, t2::SpinTerm) = (coefficient(t1) - coefficient(t2)) * monomial(t1)
+function MA.promote_operation(::typeof(combine_plus), ::Type{SpinTerm{S}}, ::Type{SpinTerm{T}}) where {S, T}
     return SpinTerm{MA.promote_operation(+, S, T)}
+end
+function MA.promote_operation(::typeof(combine_minus), ::Type{SpinTerm{S}}, ::Type{SpinTerm{T}}) where {S, T}
+    return SpinTerm{MA.promote_operation(-, S, T)}
 end
 compare(t1::SpinTerm, t2::SpinTerm) = monomial(t1) > monomial(t2)
 
 # TODO taken from TypedPolynomials
-jointerms(terms1::AbstractArray{<:SpinTerm}, terms2::AbstractArray{<:SpinTerm}) = Sequences.mergesorted(terms1, terms2, compare, combine)
+join_terms_plus(terms1::AbstractArray{<:SpinTerm}, terms2::AbstractArray{<:SpinTerm}) = Sequences.mergesorted(terms1, terms2, compare, combine_plus)
+join_terms_minus(terms1::AbstractArray{<:SpinTerm}, terms2::AbstractArray{<:SpinTerm}) = Sequences.mergesorted(terms1, terms2, compare, combine_minus)
 
-Base.:+(p1::SpinPolynomial, p2::SpinPolynomial) = SpinPolynomial(jointerms(terms(p1), terms(p2)))
-Base.:-(p1::SpinPolynomial, p2::SpinPolynomial) = SpinPolynomial(jointerms(terms(p1), (-).(terms(p2))))
+Base.:+(p1::SpinPolynomial, p2::SpinPolynomial) = SpinPolynomial(join_terms_plus(terms(p1), terms(p2)))
+Base.:+(p::SpinPolynomial, t::SpinTerm) = SpinPolynomial(join_terms_plus(terms(p), [t]))
+Base.:+(t::SpinTerm, p::SpinPolynomial) = p + t
+Base.:-(p1::SpinPolynomial, p2::SpinPolynomial) = SpinPolynomial(join_terms_minus(terms(p1), terms(p2)))
+Base.:-(p::SpinPolynomial, t::SpinTerm) = SpinPolynomial(join_terms_minus(terms(p), [t]))
+Base.:-(t::SpinTerm, p::SpinPolynomial) = SpinPolynomial(join_terms_minus([t], terms(p)))
