@@ -14,19 +14,20 @@ end
 
 
 struct SpinMonomial <: MP.AbstractMonomial
-    variables::SortedDict{Int,SpinVariable};
-    function SpinMonomial(vec::Vector{SpinVariable})
-        variables   = SortedDict{Int, SpinVariable}()
-        for spin in vec
-            if in(keys(variables),spin.id)
-                error("Monomial with repeated variable")
-            end
-            push!(variables, spin.id => spin);
+    variables::SortedDict{Int, SpinVariable}
+end
+function SpinMonomial(vec::Vector{SpinVariable})
+    variables   = SortedDict{Int, SpinVariable}()
+    for spin in vec
+        if in(keys(variables),spin.id)
+            error("Monomial with repeated variable")
         end
-        new(variables)
+        push!(variables, spin.id => spin);
     end
+    return SpinMonomial(variables)
 end
 
+Base.copy(m::SpinMonomial) = SpinMonomial(copy(m.variables))
 MP.isconstant(mono::SpinMonomial) = iszero(length(mono.variables))
 MP.monomial(spin::SpinVariable) = SpinMonomial([spin])
 function MP.exponents(spin::SpinMonomial)
@@ -54,6 +55,7 @@ end
 
 # TODO move to MP
 MP.convertconstant(::Type{SpinTerm{T}}, α) where {T} = convert(T, α) * constantmonomial(SpinTerm{T})
+Base.copy(t::SpinTerm) = SpinTerm(coefficient(t), copy(monomial(t)))
 
 _spin_name(prefix::String, indices) = prefix * "[" * join(indices, ",") * "]"
 function spin_index(prefix::String, indices)
@@ -108,6 +110,15 @@ struct SpinPolynomial{T} <: MP.AbstractPolynomial{T}
 end
 MP.terms(p::SpinPolynomial) = p.terms
 MP.zero(::Type{SpinPolynomial{T}}) where {T} = SpinPolynomial(SpinTerm{T}[])
+
+function MP.variables(monos::Vector{SpinMonomial})
+    vars = Set{SpinVariable}()
+    for mono in monos
+        union!(vars, variables(mono))
+    end
+    return sort(collect(vars), rev=true)
+end
+MP.variables(p::SpinPolynomial) = MP.variables(MP.monomials(p))
 
 # TODO move to MP
 function MP.polynomial(m::Union{SpinMonomial, SpinVariable}, T::Type)

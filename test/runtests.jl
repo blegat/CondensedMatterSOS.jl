@@ -35,6 +35,8 @@ end
 @testset "equalities" begin
     test_isequal(A, A)
     test_isequal(C, C)
+    @test A !== copy(A)
+    test_isequal(A, copy(A))
     test_isequal(sigmax[1]*sigmax[2], sigmax[2]*sigmax[1])
     test_isequal(sigmax[3] * B, B * sigmax[3])
 end
@@ -103,6 +105,7 @@ end
     end
     test_equal(-sigmax[1] * sigmax[2] - sigmax[2] * sigmax[1], -2sigmax[1] * sigmax[2])
     test_equal(sum(sigmaz), sigmaz[1] + sigmaz[2] + sigmaz[3] + sigmaz[4])
+    @test variables(sum(sigmaz)) == sigmaz
 end
 
 
