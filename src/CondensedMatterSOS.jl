@@ -40,5 +40,7 @@ import .Sequences
 include("operators.jl")
 include("monom-set.jl")
 
+include("sos.jl")
+
 export @spin
 end # module
