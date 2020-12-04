@@ -1,6 +1,5 @@
-import Reexport
-# The reexport allows to use all the things exported by JuMP such as `optimizer_with_attributes`, `MOI`, ...
-Reexport.@reexport using SumOfSquares
+using SumOfSquares
+export optimizer_with_attributes, MOI, MOIU
 
 export energy
 
