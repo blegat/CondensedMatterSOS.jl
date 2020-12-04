@@ -93,13 +93,13 @@ function mergesorted!(result, v1::AbstractArray, v2::AbstractArray, isless, comb
         x2 = v2[i2]
         if isless(x1, x2)
             if filter(x1)
-                result[i] = x1
+                result[i] = combine(x1, MA.Zero())
                 i += 1
             end
             i1 += 1
         elseif isless(x2, x1)
             if filter(x2)
-                result[i] = x2
+                result[i] = combine(MA.Zero(), x2)
                 i += 1
             end
             i2 += 1
@@ -115,13 +115,13 @@ function mergesorted!(result, v1::AbstractArray, v2::AbstractArray, isless, comb
     end
     for j in i1:length(v1)
         if filter(v1[j])
-            result[i] = v1[j]
+            result[i] = combine(v1[j], MA.Zero())
             i += 1
         end
     end
     for j in i2:length(v2)
         if filter(v2[j])
-            result[i] = v2[j]
+            result[i] = combine(MA.Zero(), v2[j])
             i += 1
         end
     end
