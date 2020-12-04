@@ -3,30 +3,15 @@ using Literate
 using CondensedMatterSOS
 using Test
 
-const _EXAMPLE_DIR = joinpath(@__DIR__, "src", "examples")
+const EXAMPLES_DIR = joinpath(@__DIR__, "..", "examples")
 const OUTPUT_DIR   = joinpath(@__DIR__, "src/generated")
 
-function link_example(content)
-    edit_url = match(r"EditURL = \"(.+?)\"", content)[1]
-    footer = match(r"^(---\n\n\*This page was generated using)"m, content)[1]
-    content = replace(
-        content, footer => "[View this file on Github]($(edit_url)).\n\n" * footer
-    )
-    return content
-end
+include(joinpath(EXAMPLES_DIR, "run_examples.jl"))
 
-for file in readdir(_EXAMPLE_DIR)
-    if !endswith(file, ".jl")
-        continue
-    end
-    filename = joinpath(_EXAMPLE_DIR, file)
-    # `include` the file to test it before `#src` lines are removed. It is in a
-    # testset to isolate local variables between files.
-    @testset "$(file)" begin
-        include(filename)
-    end
-    Literate.markdown(filename, OUTPUT_DIR; documenter = true)
-    Literate.markdown(filename, OUTPUT_DIR)
+for example in EXAMPLES
+    example_filepath = joinpath(EXAMPLES_DIR, example)
+    Literate.markdown(example_filepath, OUTPUT_DIR)
+    Literate.notebook(example_filepath, OUTPUT_DIR)
 end
 
 makedocs(
@@ -37,13 +22,11 @@ makedocs(
     strict = true,
     pages = [
         "Introduction" => "index.md",
-        "Examples" => map(
-            file -> joinpath(OUTPUT_DIR, file),
-            filter(
-                file -> endswith(file, ".md"),
-                sort(readdir(OUTPUT_DIR)),
-            )
-        )
+        "Examples" => map(EXAMPLES) do jl_file
+            # Need `string` as Documenter fails if `name` is a `SubString{String}`.
+            name = string(split(jl_file, ".")[1])
+            return name => "generated/$name.md"
+        end
     ],
 )
 

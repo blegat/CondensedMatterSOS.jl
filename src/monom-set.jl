@@ -1,5 +1,6 @@
 """
-    monomials(vars::Vector{CondensedMatterSOS.SpinVariable}, deg::Int64)
+    monomials(vars::Vector{CondensedMatterSOS.SpinVariable}, deg::Int)
+
 This version returns all the monomials of degree deg with all the possible orders
 ```
 E1. (sx[1],sx[2])->[sx[1]*sx[2],sx[2]*sx[1]];
@@ -8,11 +9,11 @@ E1. (sx[1],sx[2])->[sx[1]*sx[2],sx[2]*sx[1]];
 E2. (sx[1],sy[1])->[sx[1]*sy[1],sy[1]*sx[1]];
 ```
 """
-function monomials(vars::Vector{CondensedMatterSOS.SpinVariable}, deg::Int64)
+function monomials(vars::Vector{CondensedMatterSOS.SpinVariable}, deg::Int)
     CC = combinations(vars,deg)
     BB = permutations.(collect(Iterators.take(CC,length(CC))))
-    AA = prod.(vcat(map(x->collect(Iterators.take(x,length(x))), vcat(BB...))...));
-    return unique(AA);
+    AA = prod.(vcat(map(x->collect(Iterators.take(x,length(x))), vcat(BB...))...))
+    return unique(AA)
 end
 
 function _add_monomials!(monos, sites, current_mono, i, filter)
@@ -51,7 +52,7 @@ function MP.monomials(vars::Vector{SpinVariable}, degs::AbstractVector{Int}, fil
 end
 
 # # using CondensedMatterSOS
-# # function monomials(vars::Vector{CondensedMatterSOS.SpinVariable}, deg::Int64)
+# # function monomials(vars::Vector{CondensedMatterSOS.SpinVariable}, deg::Int)
 # #
 # #
 # # using CondensedMatterSOS
