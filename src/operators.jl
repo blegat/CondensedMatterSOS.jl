@@ -110,7 +110,11 @@ function Base.isless(a::SpinMonomial, b::SpinMonomial)
 end
 
 combine_plus(t1::SpinTerm, t2::SpinTerm) = (coefficient(t1) + coefficient(t2)) * monomial(t1)
+combine_plus(t::SpinTerm, ::MA.Zero) = MA.mutable_copy(t)
+combine_plus(::MA.Zero, t::SpinTerm) = MA.mutable_copy(t)
 combine_minus(t1::SpinTerm, t2::SpinTerm) = (coefficient(t1) - coefficient(t2)) * monomial(t1)
+combine_minus(t::SpinTerm, ::MA.Zero) = MA.mutable_copy(t)
+combine_minus(::MA.Zero, t::SpinTerm) = -t
 function MA.promote_operation(::typeof(combine_plus), ::Type{SpinTerm{S}}, ::Type{SpinTerm{T}}) where {S, T}
     return SpinTerm{MA.promote_operation(+, S, T)}
 end

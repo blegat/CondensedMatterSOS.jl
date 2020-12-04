@@ -56,6 +56,7 @@ end
 # TODO move to MP
 MP.convertconstant(::Type{SpinTerm{T}}, α) where {T} = convert(T, α) * constantmonomial(SpinTerm{T})
 Base.copy(t::SpinTerm) = SpinTerm(coefficient(t), copy(monomial(t)))
+MA.mutable_copy(t::SpinTerm) = SpinTerm(MA.copy_if_mutable(coefficient(t)), copy(monomial(t)))
 
 _spin_name(prefix::String, indices) = prefix * "[" * join(indices, ",") * "]"
 function spin_index(prefix::String, indices)
