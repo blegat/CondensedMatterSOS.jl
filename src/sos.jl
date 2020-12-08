@@ -5,7 +5,9 @@ export energy
 
 function energy(H, maxdegree, solver;
     cone=NonnegPolyInnerCone{SumOfSquares.COI.HermitianPositiveSemidefiniteConeTriangle}(),
-    certificate=SumOfSquares.Certificate.MaxDegree(cone, MonomialBasis, maxdegree),
+    sparsity=MonomialSparsity(),
+    non_sparse=SumOfSquares.Certificate.MaxDegree(cone, MonomialBasis, maxdegree),
+    certificate=sparsity isa NoSparsity ? non_sparse : SumOfSquares.Certificate.SparseIdeal(sparsity, non_sparse),
     kws...
 )
     model = MOI.instantiate(solver, with_bridge_type=Float64)
@@ -23,6 +25,7 @@ function energy(H, maxdegree, solver;
     if MOI.get(model, MOI.TerminationStatus()) != MOI.OPTIMAL
         @warn("Termination status: $(MOI.get(model, MOI.TerminationStatus())), $(MOI.get(model, MOI.RawStatusString()))")
     end
-    ν = MOI.get(model, SumOfSquares.GramMatrixAttribute(), c)
-    MOI.get(model, MOI.ObjectiveValue()), ν
+    gram = MOI.get(model, SumOfSquares.GramMatrixAttribute(), c)
+    ν = MOI.get(model, SumOfSquares.MomentMatrixAttribute(), c)
+    MOI.get(model, MOI.ObjectiveValue()), gram, ν
 end
