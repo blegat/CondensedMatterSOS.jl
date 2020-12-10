@@ -40,6 +40,8 @@ import .Sequences
 include("operators.jl")
 include("monom-set.jl")
 
+include("ising.jl")
+
 include("sos.jl")
 
 export @spin

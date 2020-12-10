@@ -1,3 +1,8 @@
 # Condensed Matter with Sum-of-Squares
 
-See examples.
+```@docs
+@spin
+ising_hamiltonian
+ising_glass_hamiltonian
+energy
+```

@@ -3,17 +3,12 @@
 #md # [![](https://mybinder.org/badge_logo.svg)](@__BINDER_ROOT_URL__/generated/Ising.ipynb)
 #md # [![](https://img.shields.io/badge/show-nbviewer-579ACA.svg)](@__NBVIEWER_ROOT_URL__/generated/Ising.ipynb)
 
-# We study the following hamiltonian:
+# We study the Hamiltonian of the transverse-field Ising model with periodic boundary conditions and transverse field `g` set to 1.
 
 using Test #src
 using CondensedMatterSOS
 @spin σ[1:2]
-function hamiltonian(σ)
-    σx, σy, σz = σ
-    N = length(σx)
-    return -sum(σx[n] * σx[n+1] for n in 1:(N-1)) - σx[N] * σx[1] - sum(σz)
-end
-hamiltonian(σ)
+ising_hamiltonian(σ, 1, true)
 
 # Let's pick a solver from [this list](https://jump.dev/JuMP.jl/dev/installation/#Getting-Solvers).
 
@@ -27,7 +22,7 @@ solver = optimizer_with_attributes(
 
 function hamiltonian_energy(N, maxdegree, solver; kws...)
     @spin σ[1:N]
-    H = 1.0 * hamiltonian(σ)
+    H = ising_hamiltonian(σ, 1, true)
     energy(H, maxdegree, solver; kws...)
 end
 bound, gram, ν = hamiltonian_energy(2, 2, solver, sparsity = NoSparsity())
@@ -36,6 +31,7 @@ bound
 
 # We can see that the moment matrix uses all monomials:
 
+@test length(ν.basis.monomials) == 7 #src
 ν.basis.monomials
 
 # Using term sparsity with block/cluster completion, we get the same bound:

@@ -98,12 +98,77 @@ function build_spins(args)
     return vars, exprs
 end
 
-# Variable vector x returned garanteed to be sorted so that if p is built with x then vars(p) == x
+"""
+    @spin(σ[1:N1, 1:N2, ...], ...)
+
+Return a tuple of 3-tuples `σ = (σx, σy, σz)` where the three elements of this tuple
+are arrays of size `(N1, N2, ...)`. Moreover, the product `σ[i][I...] * σ[j][J...]`
+* commutes if `I != J`,
+* if `I == J`, it
+  - commutes if `i == j`, moreover it satisfies the identity: `σx[I...] * σx[I...] == σy[I...] * σy[I...] == σz[I...] * σz[I...] = 1`.
+  - anticommutes if `i != j`, moreover it satisifes the identities:
+    * `σx * σy == -σy * σx == im * σz`;
+    * `σy * σz == -σz * σy == im * σx`;
+    * `σz * σx == -σx * σz == im * σy`.
+
+It also sets the 3-tuple to the local Julia variable with name `σ`.
+
+The macro can either be used to create several groups that commute with each other
+```jldoctest
+julia> using CondensedMatterSOS
+
+julia> (σ1x, σ1y, σ1z), (σ2x, σ2y, σ2z) = @spin(σ1, σ2)
+((σ1ˣ, σ1ʸ, σ1ᶻ), (σ2ˣ, σ2ʸ, σ2ᶻ))
+
+julia> σ1x * σ2y
+σ1ˣσ2ʸ
+
+julia> σ1x * σ1y
+(0 + 1im)σ1ᶻ
+
+julia> σ2z * σ2y
+(0 - 1im)σ2ˣ
+
+julia> (σ1x + σ2y) * (σ2x + im * σ1z)
+σ1ˣσ2ˣ + (0 + 1im)σ1ᶻσ2ʸ + σ1ʸ + (0 - 1im)σ2ᶻ
+```
+
+Or also a vector of groups commuting with each other. Note that it returns a 1-tuple
+containing a 3-tuple hence the needed comma after `(σx, σy, σz)`
+
+```jldoctest
+julia> using CondensedMatterSOS
+
+julia> (σx, σy, σz), = @spin(σ[1:2])
+((CondensedMatterSOS.SpinVariable[σˣ₁, σˣ₂], CondensedMatterSOS.SpinVariable[σʸ₁, σʸ₂], CondensedMatterSOS.SpinVariable[σᶻ₁, σᶻ₂]),)
+
+julia> σx[1] * σx[2]
+σˣ₁σˣ₂
+
+julia> σx[2] * σx[1]
+σˣ₁σˣ₂
+
+julia> σx[1] * σx[1]
+(1 + 0im)
+
+julia> σy[1] * σy[1]
+(1 + 0im)
+
+julia> σx[1] * σy[1]
+(0 + 1im)σᶻ₁
+
+julia> σy[1] * σx[1]
+(0 - 1im)σᶻ₁
+
+julia> σz[1] * σx[1]
+(0 + 1im)σʸ₁
+```
+"""
 macro spin(args...)
+    # Variable vector x returned garanteed to be sorted so that if p is built with x then vars(p) == x
     vars, exprs = build_spins(args)
     :($(foldl((x,y) -> :($x; $y), exprs, init=:())); $(Expr(:tuple, esc.(vars)...)))
 end
-
 
 
 struct SpinPolynomial{T} <: MP.AbstractPolynomial{T}

@@ -32,4 +32,5 @@ makedocs(
 
 deploydocs(
     repo   = "github.com/blegat/CondensedMatterSOS.jl.git",
+    push_preview = true,
 )
