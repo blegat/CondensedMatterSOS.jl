@@ -16,7 +16,7 @@ solver = optimizer_with_attributes(
     energy(H, maxdegree, solver; kws...)
 end
 bound, gram, ν = hamiltonian_energy(2, 2, solver, sparsity = NoSparsity())
-bound</code></pre><pre class="documenter-example-output">-0.8534519037352409</pre><p>We can see that the moment matrix uses all monomials:</p><pre><code class="language-julia">ν.basis.monomials</code></pre><pre class="documenter-example-output">7-element Array{CondensedMatterSOS.SpinMonomial,1}:
+bound</code></pre><pre class="documenter-example-output">-0.8534519037352764</pre><p>We can see that the moment matrix uses all monomials:</p><pre><code class="language-julia">ν.basis.monomials</code></pre><pre class="documenter-example-output">7-element Array{CondensedMatterSOS.SpinMonomial,1}:
  1
  σˣ₁
  σʸ₁
@@ -24,10 +24,10 @@ bound</code></pre><pre class="documenter-example-output">-0.8534519037352409</pr
  σˣ₂
  σʸ₂
  σᶻ₂</pre><p>Using term sparsity with block/cluster completion, we get the same bound:</p><pre><code class="language-julia">bound, gram, ν = hamiltonian_energy(2, 2, solver)
-bound</code></pre><pre class="documenter-example-output">-0.8534519037605935</pre><p>But with a smaller basis:</p><pre><code class="language-julia">[M.basis.monomials for M in ν.sub_moment_matrices]</code></pre><pre class="documenter-example-output">2-element Array{Array{CondensedMatterSOS.SpinMonomial,1},1}:
+bound</code></pre><pre class="documenter-example-output">-0.8534519037605606</pre><p>But with a smaller basis:</p><pre><code class="language-julia">[M.basis.monomials for M in ν.sub_moment_matrices]</code></pre><pre class="documenter-example-output">2-element Array{Array{CondensedMatterSOS.SpinMonomial,1},1}:
  [σᶻ₁, σᶻ₂, 1]
  [σˣ₁, σʸ₁, σˣ₂, σʸ₂]</pre><p>Using term sparsity with chordal completion, we get a smaller bound:</p><pre><code class="language-julia">bound, gram, ν = hamiltonian_energy(2, 2, solver, sparsity = MonomialSparsity(ChordalCompletion()))
-bound</code></pre><pre class="documenter-example-output">-1.0972879866755514</pre><p>But with an even smaller basis:</p><pre><code class="language-julia">[M.basis.monomials for M in ν.sub_moment_matrices]</code></pre><pre class="documenter-example-output">5-element Array{Array{CondensedMatterSOS.SpinMonomial,1},1}:
+bound</code></pre><pre class="documenter-example-output">-1.0972879866750802</pre><p>But with an even smaller basis:</p><pre><code class="language-julia">[M.basis.monomials for M in ν.sub_moment_matrices]</code></pre><pre class="documenter-example-output">5-element Array{Array{CondensedMatterSOS.SpinMonomial,1},1}:
  [σˣ₂, σʸ₂]
  [σᶻ₂, 1]
  [σᶻ₁, 1]
@@ -39,7 +39,7 @@ hamiltonian(σ)</code></pre><p class="math-container">\[ (0.2972879845354616 + 0
     energy(H, maxdegree, solver; kws...)
 end
 bound, gram, ν = hamiltonian_energy(2, 2, 2, solver, sparsity = NoSparsity())
-bound</code></pre><pre class="documenter-example-output">-1.9905121018001712</pre><p>We can see that the moment matrix uses all monomials:</p><pre><code class="language-julia">ν.basis.monomials</code></pre><pre class="documenter-example-output">13-element Array{CondensedMatterSOS.SpinMonomial,1}:
+bound</code></pre><pre class="documenter-example-output">-1.9905121018025886</pre><p>We can see that the moment matrix uses all monomials:</p><pre><code class="language-julia">ν.basis.monomials</code></pre><pre class="documenter-example-output">13-element Array{CondensedMatterSOS.SpinMonomial,1}:
  1
  σˣ₁₋₁
  σʸ₁₋₁
@@ -53,10 +53,10 @@ bound</code></pre><pre class="documenter-example-output">-1.9905121018001712</pr
  σˣ₂₋₂
  σʸ₂₋₂
  σᶻ₂₋₂</pre><p>Using term sparsity with block/cluster completion, we get the same bound:</p><pre><code class="language-julia">bound, gram, ν = hamiltonian_energy(2, 2, 2, solver)
-bound</code></pre><pre class="documenter-example-output">-1.9905121009002253</pre><p>But with a smaller basis:</p><pre><code class="language-julia">[M.basis.monomials for M in ν.sub_moment_matrices]</code></pre><pre class="documenter-example-output">2-element Array{Array{CondensedMatterSOS.SpinMonomial,1},1}:
+bound</code></pre><pre class="documenter-example-output">-1.9905121009002853</pre><p>But with a smaller basis:</p><pre><code class="language-julia">[M.basis.monomials for M in ν.sub_moment_matrices]</code></pre><pre class="documenter-example-output">2-element Array{Array{CondensedMatterSOS.SpinMonomial,1},1}:
  [σᶻ₁₋₁, σᶻ₂₋₁, σᶻ₁₋₂, σᶻ₂₋₂, 1]
  [σˣ₁₋₁, σʸ₁₋₁, σˣ₂₋₁, σʸ₂₋₁, σˣ₁₋₂, σʸ₁₋₂, σˣ₂₋₂, σʸ₂₋₂]</pre><p>Using term sparsity with chordal completion, we get a smaller bound:</p><pre><code class="language-julia">bound, gram, ν = hamiltonian_energy(2, 2, 2, solver, sparsity = MonomialSparsity(ChordalCompletion()))
-bound</code></pre><pre class="documenter-example-output">-2.655703628431353</pre><p>But with an even smaller basis:</p><pre><code class="language-julia">[M.basis.monomials for M in ν.sub_moment_matrices]</code></pre><pre class="documenter-example-output">9-element Array{Array{CondensedMatterSOS.SpinMonomial,1},1}:
+bound</code></pre><pre class="documenter-example-output">-2.6557036284313207</pre><p>But with an even smaller basis:</p><pre><code class="language-julia">[M.basis.monomials for M in ν.sub_moment_matrices]</code></pre><pre class="documenter-example-output">9-element Array{Array{CondensedMatterSOS.SpinMonomial,1},1}:
  [σᶻ₁₋₂, σᶻ₂₋₂, 1]
  [σˣ₁₋₂, σʸ₁₋₂, σˣ₂₋₂]
  [σˣ₂₋₁, σˣ₁₋₂, σˣ₂₋₂]
