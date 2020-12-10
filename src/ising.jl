@@ -19,7 +19,7 @@ function interactions(σ::Array{T,N}, periodic::Bool, coef::Function) where {T,N
 end
 
 """
-   ising_hamiltonian(σ, g, periodic::Bool, coef::Function = (I, J) -> 1)
+    ising_hamiltonian(σ, g, periodic::Bool, coef::Function = (I, J) -> 1)
 
 Return the Hamiltonian of the transverse-field Ising model with periodic boundary conditions if `periodic` is `true` and transverse field `g`.
 The input `σ` should be a triple `σx, σy, σz` of arrays as created with [`@spin`](@ref).
@@ -40,7 +40,7 @@ function ising_hamiltonian(σ, g, periodic::Bool, coef::Function = (I, J) -> 1)
 end
 
 """
-   ising_glass_hamiltonian(σ, g, periodic::Bool, coef::Function = (I, J) -> 1)
+    ising_glass_hamiltonian(σ, g, periodic::Bool)
 
 Return the Hamiltonian of the transverse-field Ising spin glass model with periodic boundary conditions if `periodic` is `true` and transverse field `g`.
 The input `σ` should be a triple `σx, σy, σz` of arrays as created with [`@spin`](@ref).
