@@ -152,9 +152,18 @@ end
 
 @testset "monomials" begin
     @test monovec([1, sigmax[1], sigmax[2]]) == [sigmax[1], sigmax[2], 1]
-    @test monomials([sigmax[1], sigmax[2]], 0) == [1]
     @test CMS.monomials([sigmax[1], sigmax[2]], 0) == [1]
-    @test all(monomials([sigmax[1], sigmax[2]], 2) .== [CMS.SpinVariable(sigmax[1].id, i) * CMS.SpinVariable(sigmax[2].id, j) for i in 0:2 for j in 0:2])
+    for consecutive in [false, true]
+        @test monomials([sigmax[1], sigmax[2]], 0, consecutive=consecutive) == [1]
+        @test all(monomials([sigmax[1], sigmax[2]], 2, consecutive=consecutive) .== [CMS.SpinVariable(sigmax[1].id, i) * CMS.SpinVariable(sigmax[2].id, j) for i in 0:2 for j in 0:2])
+    end
+    @test all(monomials([sigmax[1], sigmax[2], sigmax[4]], 2, consecutive=true) .== append!(
+        append!(
+            [CMS.SpinVariable(sigmax[1].id, i) * CMS.SpinVariable(sigmax[2].id, j) for i in 0:2 for j in 0:2],
+            [CMS.SpinVariable(sigmax[2].id, i) * CMS.SpinVariable(sigmax[4].id, j) for i in 0:2 for j in 0:2]
+        ),
+        [CMS.SpinVariable(sigmax[4].id, i) * CMS.SpinVariable(sigmax[1].id, j) for i in 0:2 for j in 0:2],
+    ))
     @test all(CMS.monomials([sigmax[1],sigmax[2]],2) .== [sigmax[1]*sigmax[2]])
     @test all(CMS.monomials([sigmax[1],sigmay[1]],2) .== [im*sigmaz[1],-im*sigmaz[1]])
 end

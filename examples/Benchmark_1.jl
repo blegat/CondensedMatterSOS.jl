@@ -81,7 +81,9 @@ bound
 @test length(ν.basis.monomials) == 7 #src
 ν.basis.monomials
 
-# Symmetry reduction
+# # Symmetry reduction
+#
+# We can reduce the computation using symmetry reduction as follows.
 
 using CondensedMatterSOS
 
@@ -93,10 +95,15 @@ bound, gram, ν = hamiltonian_energy(
 @test bound ≈ -6 rtol=1e-6 #src
 bound
 
+# The reduction is obtained by block diagonalizing with a change of polynomial
+# basis to the isotypical basis.
+
 display([M.basis.polynomials for M in ν.sub_moment_matrices])
 
 @test length(ν.sub_moment_matrices) == 7
 [M.basis.polynomials for M in ν.sub_moment_matrices]
+
+# Let's try this for 3 sites. First without symmetry.
 
 bound, gram, ν = hamiltonian_energy(
     3,
@@ -107,6 +114,8 @@ bound, gram, ν = hamiltonian_energy(
 @show bound
 @test bound ≈ -4.5 rtol=1e-6 #src
 
+# Now with symmetry.
+
 bound, gram, ν = hamiltonian_energy(
     3,
     2,
@@ -114,6 +123,9 @@ bound, gram, ν = hamiltonian_energy(
 )
 @show bound
 @test bound ≈ -4.5 rtol=1e-6 #src
+
+# Let's look at the isotypical basis.
+
 display([M.basis.polynomials for M in ν.sub_moment_matrices])
 
 # Now let's define a function for our common use case.
