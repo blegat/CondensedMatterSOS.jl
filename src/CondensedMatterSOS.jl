@@ -1,13 +1,14 @@
 module CondensedMatterSOS
 
-using MultivariatePolynomials
 using DataStructures
 using Combinatorics
 
 import MutableArithmetics
 const MA = MutableArithmetics
 
+import MultivariatePolynomials
 const MP = MultivariatePolynomials
+
 include("types.jl")
 
 # Used to print variable

@@ -1,3 +1,6 @@
+using Pkg
+pkg"add SumOfSquares#master"
+
 using Documenter
 using Literate
 using CondensedMatterSOS

@@ -28,25 +28,48 @@ function _add_monomials!(monos, sites, current_mono, i, filter)
         end
     end
 end
-function _monomials(sites::Vector{Int}, deg::Int, filter::Function, monos)
-    for active_sites in combinations(sites, deg)
-        _add_monomials!(monos, active_sites, constantmonomial(SpinMonomial), 1, filter)
+function _monomials(sites::Vector{Int}, deg::Int, filter::Function, monos, consecutive)
+    if consecutive
+        if deg == 0
+            _add_monomials!(monos, Int[], MP.constantmonomial(SpinMonomial), 1, filter)
+            return monos
+        end
+        if deg >= length(sites)
+            if deg == length(sites)
+                _add_monomials!(monos, sites, MP.constantmonomial(SpinMonomial), 1, filter)
+            end
+            return monos
+        end
+        for i in eachindex(sites)
+            n = i+deg-1
+            m = length(sites)
+            active_sites = sites[i:min(n, m)]
+            if n > m
+                append!(active_sites, sites[1:(n-m)])
+            end
+            @assert length(active_sites) == deg
+            _add_monomials!(monos, active_sites, MP.constantmonomial(SpinMonomial), 1, filter)
+        end
+    else
+        for active_sites in combinations(sites, deg)
+            _add_monomials!(monos, active_sites, MP.constantmonomial(SpinMonomial), 1, filter)
+        end
     end
     return monos
 end
-function _monomials(vars::Vector{SpinVariable}, deg::Int, filter::Function, monos)
+function _monomials(vars::Vector{SpinVariable}, deg::Int, filter::Function, monos, consecutive)
     sites = unique!(sort!(map(var -> var.id, vars)))
-    return _monomials(sites, deg, filter, monos)
+    return _monomials(sites, deg, filter, monos, consecutive)
 end
 
-function MP.monomials(vars::Vector{SpinVariable}, deg::Int, filter::Function = x -> true)
-    return _monomials(vars, deg, filter, SpinMonomial[])
+function MP.monomials(vars::Vector{SpinVariable}, deg::Int, filter::Function = x -> true; consecutive=false)
+    return _monomials(vars, deg, filter, SpinMonomial[], consecutive)
 end
 
-function MP.monomials(vars::Vector{SpinVariable}, degs::AbstractVector{Int}, filter::Function = x -> true)
+function MP.monomials(vars::Vector{SpinVariable}, degs::AbstractVector{Int}, filter::Function = x -> true; consecutive=false)
     monos = SpinMonomial[]
     for deg in sort(degs)
-        _monomials(vars, deg, filter, monos)
+        _monomials(vars, deg, filter, monos, consecutive)
     end
     return monos
 end
