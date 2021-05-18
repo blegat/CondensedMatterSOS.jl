@@ -20,7 +20,7 @@ solver = optimizer_with_attributes(
 
 # We can compute a lower bound `-2√2` to the ground state energy as follow:
 
-include("symmetry.jl")
+include(joinpath(dirname(dirname(pathof(CondensedMatterSOS))), "examples", "symmetry.jl"))
 function hamiltonian_energy(N, maxdegree, solver; symmetry=true, consecutive=false, kws...)
     @spin σ[1:N]
     function action(mono::CondensedMatterSOS.SpinMonomial, el::DirectSum)
@@ -100,7 +100,7 @@ bound
 
 display([M.basis.polynomials for M in ν.sub_moment_matrices])
 
-@test length(ν.sub_moment_matrices) == 7
+@test length(ν.sub_moment_matrices) == 7 #src
 [M.basis.polynomials for M in ν.sub_moment_matrices]
 
 # Let's try this for 3 sites. First without symmetry.
