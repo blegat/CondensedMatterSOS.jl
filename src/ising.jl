@@ -1,4 +1,4 @@
-export ising_hamiltonian, ising_glass_hamiltonian
+export heisenberg_hamiltonian, ising_hamiltonian, ising_glass_hamiltonian
 
 function _wrap(I::CartesianIndex, sz::Tuple, periodic::Bool)
     if periodic
@@ -16,6 +16,30 @@ function interactions(σ::Array{T,N}, periodic::Bool, coef::Function) where {T,N
         for I in CartesianIndices(σ), Δ in Δs
         if _wrap(I + Δ, size(σ), periodic) in CartesianIndices(σ)
     ])
+end
+
+"""
+    heisenberg_hamiltonian(σ, periodic::Bool, coef::Function = (I, J) -> 1)
+
+Return the Hamiltonian of the Heisenberg model with periodic boundary conditions if `periodic` is `true`.
+The input `σ` should be a triple `σx, σy, σz` of arrays as created with [`@spin`](@ref).
+
+```jldoctest
+julia> using CondensedMatterSOS
+
+julia> @spin(σ[1:3])
+((CondensedMatterSOS.SpinVariable[σˣ₁, σˣ₂, σˣ₃], CondensedMatterSOS.SpinVariable[σʸ₁, σʸ₂, σʸ₃], CondensedMatterSOS.SpinVariable[σᶻ₁, σᶻ₂, σᶻ₃]),)
+
+julia> heisenberg_hamiltonian(σ, false)
+σˣ₁σˣ₂ + σʸ₁σʸ₂ + σᶻ₁σᶻ₂ + σˣ₂σˣ₃ + σʸ₂σʸ₃ + σᶻ₂σᶻ₃
+
+julia> heisenberg_hamiltonian(σ, true)
+σˣ₁σˣ₂ + σˣ₁σˣ₃ + σʸ₁σʸ₂ + σʸ₁σʸ₃ + σᶻ₁σᶻ₂ + σᶻ₁σᶻ₃ + σˣ₂σˣ₃ + σʸ₂σʸ₃ + σᶻ₂σᶻ₃
+```
+"""
+function heisenberg_hamiltonian(σ, periodic::Bool, coef::Function = (I, J) -> 1)
+    σx, σy, σz = σ
+    return interactions(σx, periodic, coef) + interactions(σy, periodic, coef) + interactions(σz, periodic, coef)
 end
 
 """

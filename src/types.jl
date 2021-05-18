@@ -54,9 +54,9 @@ struct SpinTerm{T} <: MP.AbstractTerm{T}
 end
 
 # TODO move to MP
-MP.convertconstant(::Type{SpinTerm{T}}, α) where {T} = convert(T, α) * constantmonomial(SpinTerm{T})
-Base.copy(t::SpinTerm) = SpinTerm(coefficient(t), copy(monomial(t)))
-MA.mutable_copy(t::SpinTerm) = SpinTerm(MA.copy_if_mutable(coefficient(t)), copy(monomial(t)))
+MP.convertconstant(::Type{SpinTerm{T}}, α) where {T} = convert(T, α) * MP.constantmonomial(SpinTerm{T})
+Base.copy(t::SpinTerm) = SpinTerm(MP.coefficient(t), copy(MP.monomial(t)))
+MA.mutable_copy(t::SpinTerm) = SpinTerm(MA.copy_if_mutable(MP.coefficient(t)), copy(MP.monomial(t)))
 
 _spin_name(prefix::String, indices) = prefix * "[" * join(indices, ",") * "]"
 function spin_index(prefix::String, indices)
@@ -197,7 +197,7 @@ function MP.polynomial(t::SpinTerm, T::Type)
     return MP.polynomial(MP.changecoefficienttype(t, T), T)
 end
 function MP.polynomial(p::SpinPolynomial, T::Type)
-    return SpinPolynomial(MP.changecoefficienttype.(terms(p), T))
+    return SpinPolynomial(MP.changecoefficienttype.(MP.terms(p), T))
 end
 
 const SpinLike = Union{SpinVariable, SpinMonomial, SpinTerm, SpinPolynomial}

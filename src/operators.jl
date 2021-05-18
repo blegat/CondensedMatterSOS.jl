@@ -81,7 +81,7 @@ function Base.isless(a::SpinVariable, b::SpinMonomial)
         (isone(length(b.variables)) && a < first(values(b.variables)))
 end
 function Base.isless(a::SpinMonomial, b::SpinVariable)
-    return isconstant(a) ||
+    return MP.isconstant(a) ||
         (isone(length(a.variables)) && first(values(a.variables)) < b)
 end
 function Base.isless(a::SpinMonomial, b::SpinMonomial)
@@ -109,10 +109,10 @@ function Base.isless(a::SpinMonomial, b::SpinMonomial)
     return false
 end
 
-combine_plus(t1::SpinTerm, t2::SpinTerm) = (coefficient(t1) + coefficient(t2)) * monomial(t1)
+combine_plus(t1::SpinTerm, t2::SpinTerm) = (MP.coefficient(t1) + MP.coefficient(t2)) * MP.monomial(t1)
 combine_plus(t::SpinTerm, ::MA.Zero) = MA.mutable_copy(t)
 combine_plus(::MA.Zero, t::SpinTerm) = MA.mutable_copy(t)
-combine_minus(t1::SpinTerm, t2::SpinTerm) = (coefficient(t1) - coefficient(t2)) * monomial(t1)
+combine_minus(t1::SpinTerm, t2::SpinTerm) = (MP.coefficient(t1) - MP.coefficient(t2)) * MP.monomial(t1)
 combine_minus(t::SpinTerm, ::MA.Zero) = MA.mutable_copy(t)
 combine_minus(::MA.Zero, t::SpinTerm) = -t
 function MA.promote_operation(::typeof(combine_plus), ::Type{SpinTerm{S}}, ::Type{SpinTerm{T}}) where {S, T}
@@ -127,9 +127,9 @@ compare(t1::SpinTerm, t2::SpinTerm) = monomial(t1) > monomial(t2)
 join_terms_plus(terms1::AbstractArray{<:SpinTerm}, terms2::AbstractArray{<:SpinTerm}) = Sequences.mergesorted(terms1, terms2, compare, combine_plus)
 join_terms_minus(terms1::AbstractArray{<:SpinTerm}, terms2::AbstractArray{<:SpinTerm}) = Sequences.mergesorted(terms1, terms2, compare, combine_minus)
 
-Base.:+(p1::SpinPolynomial, p2::SpinPolynomial) = SpinPolynomial(join_terms_plus(terms(p1), terms(p2)))
-Base.:+(p::SpinPolynomial, t::SpinTerm) = SpinPolynomial(join_terms_plus(terms(p), [t]))
+Base.:+(p1::SpinPolynomial, p2::SpinPolynomial) = SpinPolynomial(join_terms_plus(MP.terms(p1), MP.terms(p2)))
+Base.:+(p::SpinPolynomial, t::SpinTerm) = SpinPolynomial(join_terms_plus(MP.terms(p), [t]))
 Base.:+(t::SpinTerm, p::SpinPolynomial) = p + t
-Base.:-(p1::SpinPolynomial, p2::SpinPolynomial) = SpinPolynomial(join_terms_minus(terms(p1), terms(p2)))
-Base.:-(p::SpinPolynomial, t::SpinTerm) = SpinPolynomial(join_terms_minus(terms(p), [t]))
-Base.:-(t::SpinTerm, p::SpinPolynomial) = SpinPolynomial(join_terms_minus([t], terms(p)))
+Base.:-(p1::SpinPolynomial, p2::SpinPolynomial) = SpinPolynomial(join_terms_minus(MP.terms(p1), MP.terms(p2)))
+Base.:-(p::SpinPolynomial, t::SpinTerm) = SpinPolynomial(join_terms_minus(MP.terms(p), [t]))
+Base.:-(t::SpinTerm, p::SpinPolynomial) = SpinPolynomial(join_terms_minus([t], MP.terms(p)))
