@@ -143,13 +143,17 @@ function f(L, d=1, consecutive=false; symmetry=true)
     )
     @show bound
     for M in ν.sub_moment_matrices
-        display(M.basis.polynomials)
+        display(round.(M.basis.polynomials, digits=6))
     end
     println("E/N = ", bound / L)
     println("------------------------------------")
 end
 
 f(6, 1, true)
+
+# Now with `d = 2`.
+
+f(6, 2, true)
 
 # | id     | irep 1 | irep 2 | irep 3 | irep 4 |
 # |--------|--------|--------|--------|--------|
