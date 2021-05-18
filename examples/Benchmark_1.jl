@@ -21,7 +21,7 @@ solver = optimizer_with_attributes(
 # We can compute a lower bound `-2√2` to the ground state energy as follow:
 
 include("symmetry.jl")
-function hamiltonian_energy(N, maxdegree, solver; symmetry=true, kws...)
+function hamiltonian_energy(N, maxdegree, solver; symmetry=true, consecutive=false, kws...)
     @spin σ[1:N]
     function action(mono::CondensedMatterSOS.SpinMonomial, el::DirectSum)
         isempty(mono.variables) && return 1 * mono
@@ -48,12 +48,15 @@ function hamiltonian_energy(N, maxdegree, solver; symmetry=true, kws...)
     end
     H = heisenberg_hamiltonian(σ, true)
     G = Lattice1Group(N)
+    cone = NonnegPolyInnerCone{SumOfSquares.COI.HermitianPositiveSemidefiniteConeTriangle}()
+    @assert iseven(maxdegree)
+    cert = SumOfSquares.Certificate.FixedBasis(
+        cone,
+        MonomialBasis(MP.monomials(σ[1], 0:div(maxdegree, 2), consecutive=consecutive)),
+    )
+    display(cert.basis.monomials)
     certificate = SymmetricIdeal(
-        SumOfSquares.Certificate.MaxDegree(
-            NonnegPolyInnerCone{SumOfSquares.COI.HermitianPositiveSemidefiniteConeTriangle}(),
-            MonomialBasis,
-            maxdegree,
-        ),
+        cert,
         G,
         action,
     )
@@ -113,18 +116,28 @@ bound, gram, ν = hamiltonian_energy(
 @test bound ≈ -4.5 rtol=1e-6 #src
 display([M.basis.polynomials for M in ν.sub_moment_matrices])
 
-function f(N, d=2)
-    bound, gram, ν = hamiltonian_energy(
-        N,
-        d,
+# Now let's define a function for our common use case.
+
+function f(L, d=1, consecutive=false; symmetry=true)
+    @show L
+    println("***")
+    @show d
+    bound, gram, ν = @time hamiltonian_energy(
+        L,
+        2d,
         solver,
+        consecutive=consecutive,
+        symmetry=symmetry,
     )
     @show bound
     for M in ν.sub_moment_matrices
         display(M.basis.polynomials)
     end
+    println("E/N = ", bound / L)
+    println("------------------------------------")
 end
 
+f(6, 1, true)
 
 # | id     | irep 1 | irep 2 | irep 3 | irep 4 |
 # |--------|--------|--------|--------|--------|

@@ -13,7 +13,7 @@ end
 function Base.:*(a::SpinVariable, b::SpinVariable)
     if a.id == b.id
         if a.index == b.index
-            return (1 + 0im) * constantmonomial(a)
+            return (1 + 0im) * MP.constantmonomial(a)
             # We want to return `1` but in which type ?
             # We could use `Bool` type as it the type compatible with the most other types in Julia
             # but currently the convention is `Int` in MP, i.e. variables and monomials are `AbstractTerm{Int}`.
