@@ -16,7 +16,7 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 Combinatorics = "1.0.2"
 DataStructures = "0.18.7"
 MultivariatePolynomials = "0.3.11, 0.4"
-MutableArithmetics = "0.2.10"
+MutableArithmetics = "0.2.10, 0.3"
 Reexport = "0.2, 1"
 SumOfSquares = "0.4.3"
 
