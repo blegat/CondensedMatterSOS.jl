@@ -43,6 +43,8 @@ include("monom-set.jl")
 
 include("ising.jl")
 
+include("symmetry.jl")
+include("action.jl")
 include("sos.jl")
 
 export @spin

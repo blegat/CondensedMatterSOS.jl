@@ -2,6 +2,8 @@ using SumOfSquares
 using GroupsCore
 using PermutationGroups
 
+export Lattice1Group
+
 struct KleinElement <: GroupElement
     id::Int
 end

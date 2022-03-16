@@ -1,4 +1,5 @@
-using SumOfSquares
+using Reexport
+@reexport using SumOfSquares
 export optimizer_with_attributes, MOI, MOIU, NoSparsity, MonomialSparsity, ChordalCompletion
 
 export energy
