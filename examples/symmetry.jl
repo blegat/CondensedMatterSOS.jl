@@ -1,6 +1,6 @@
 using SumOfSquares
-include(joinpath(dirname(dirname(pathof(SumOfSquares))), "examples", "symmetry.jl"))
-include(joinpath(dirname(dirname(pathof(SumOfSquares))), "examples", "scaled_perm.jl"))
+using GroupsCore
+using PermutationGroups
 
 struct KleinElement <: GroupElement
     id::Int
@@ -180,6 +180,7 @@ Base.:^(a::DirectSum, b::DirectSum) = conj(a, b)
 struct Lattice1Group <: Group
     n::Int
 end
+Base.eltype(::Lattice1Group) = DirectSum
 Base.one(el::DirectSum) = DirectSum(one(el.c), one(el.k))
 Base.one(L::Lattice1Group) = DirectSum(CyclicElem(L.n, 0), one(KleinPermGroup()))
 function PermutationGroups.gens(L::Lattice1Group)
