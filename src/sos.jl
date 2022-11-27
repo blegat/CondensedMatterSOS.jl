@@ -3,6 +3,12 @@ export optimizer_with_attributes, MOI, MOIU, NoSparsity, MonomialSparsity, Chord
 
 export energy
 
+function all_odd(mono::SpinMonomial)
+    return all(0:2) do index
+        isodd(count(v -> v.index == index, values(mono.variable)))
+    end
+end
+
 """
     energy(H, maxdegree, solver;
         cone=NonnegPolyInnerCone{SumOfSquares.COI.HermitianPositiveSemidefiniteConeTriangle}(),
@@ -25,6 +31,7 @@ function energy(H, maxdegree, solver;
     sparsity=MonomialSparsity(),
     non_sparse=SumOfSquares.Certificate.MaxDegree(cone, MonomialBasis, maxdegree),
     certificate=sparsity isa NoSparsity ? non_sparse : SumOfSquares.Certificate.SparseIdeal(sparsity, non_sparse),
+    odd_sym=false,
     kws...
 )
     model = MOI.instantiate(solver, with_bridge_type=Float64)
@@ -36,14 +43,40 @@ function energy(H, maxdegree, solver;
     MOI.Bridges.add_bridge(model, SumOfSquares.COI.Bridges.Constraint.SplitZeroBridge{Float64})
     γ = MOI.SingleVariable(MOI.add_variable(model))
     poly = convert(SpinPolynomial{Complex{Float64}}, H) - (1.0 + 0.0im) * γ
-    c = SumOfSquares.add_constraint(model, poly, SOSCone(); ideal_certificate=certificate, kws...)
+    if odd_sym
+        gram_basis = SumOfSquares.Certificate.get(certificate, SumOfSquares.Certificate.GramBasis(), poly)
+        MCT = SumOfSquares.COI.HermitianPositiveSemidefiniteConeTriangle
+        g, Q, cQ = SumOfSquares.add_gram_matrix(model, MCT, gram_basis, Complex{Float64})
+        q = MA.operate!(-, poly, g)
+        for t in MP.terms(q)
+            MOI.add_constraint(model, MOIU.operate(vcat, Complex{Float64}, MP.coefficient(t)), MOI.Zeros(1))
+        end
+    else
+        c = SumOfSquares.add_constraint(model, poly, cone; ideal_certificate=certificate, kws...)
+    end
     MOI.set(model, MOI.ObjectiveSense(), MOI.MAX_SENSE)
     MOI.set(model, MOI.ObjectiveFunction{MOI.SingleVariable}(), γ)
     MOI.optimize!(model)
     if MOI.get(model, MOI.TerminationStatus()) != MOI.OPTIMAL
         @warn("Termination status: $(MOI.get(model, MOI.TerminationStatus())), $(MOI.get(model, MOI.RawStatusString()))")
     end
-    gram = MOI.get(model, SumOfSquares.GramMatrixAttribute(), c)
-    ν = MOI.get(model, SumOfSquares.MomentMatrixAttribute(), c)
+    if odd_sym
+
+        gram = SumOfSquares.Bridges.Constraint._gram(Q -> MOI.get(model, MOI.VariablePrimal(), Q),
+                     Q, gram_basis, Complex{Float64}, MCT)
+        ν = if cQ isa Vector{<:MOI.ConstraintIndex}
+            SumOfSquares.build_moment_matrix(gram_basis) do i
+                MOI.get(model, MOI.ConstraintDual(), cQ[i])
+            end
+        else
+            SOS.build_moment_matrix(
+                MOI.get(model, MOI.ConstraintDual(), cQ),
+                gram_basis,
+            )
+        end
+    else
+        gram = MOI.get(model, SumOfSquares.GramMatrixAttribute(), c)
+        ν = MOI.get(model, SumOfSquares.MomentMatrixAttribute(), c)
+    end
     MOI.get(model, MOI.ObjectiveValue()), gram, ν
 end

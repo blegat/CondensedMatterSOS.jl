@@ -130,22 +130,22 @@ display([M.basis.polynomials for M in ν.sub_moment_matrices])
 
 # Now let's define a function for our common use case.
 
-function f(L, d=1, consecutive=false; symmetry=true)
+function f(L, d=1, consecutive=false; kws...)
     @show L
     println("***")
     @show d
     bound, gram, ν = @time hamiltonian_energy(
         L,
         2d,
-        solver,
+        solver;
         consecutive=consecutive,
-        symmetry=symmetry,
+        kws...,
     )
     @show bound
     for M in ν.sub_moment_matrices
         display(round.(M.basis.polynomials, digits=6))
     end
-    println("E/N = ", bound / L)
+    println("E/N = ", bound / (4L))
     println("------------------------------------")
 end
 
