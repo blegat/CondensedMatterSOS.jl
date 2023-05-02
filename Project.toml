@@ -19,7 +19,7 @@ Combinatorics = "1.0.2"
 DataStructures = "0.18.7"
 MultivariatePolynomials = "0.4"
 MutableArithmetics = "1"
-Reexport = "0.2, 1"
+Reexport = "1"
 SumOfSquares = "0.6"
 julia = "1.6"
 
