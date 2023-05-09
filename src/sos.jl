@@ -1,4 +1,5 @@
-using SumOfSquares
+using Reexport
+@reexport using SumOfSquares
 export optimizer_with_attributes, MOI, MOIU, NoSparsity, MonomialSparsity, ChordalCompletion
 
 export energy
@@ -22,9 +23,9 @@ of the SumOfSquares package.
 """
 function energy(H, maxdegree, solver;
     cone=NonnegPolyInnerCone{SumOfSquares.COI.HermitianPositiveSemidefiniteConeTriangle}(),
-    sparsity=MonomialSparsity(),
+    sparsity=Sparsity.Monomial(),
     non_sparse=SumOfSquares.Certificate.MaxDegree(cone, MonomialBasis, maxdegree),
-    certificate=sparsity isa NoSparsity ? non_sparse : SumOfSquares.Certificate.SparseIdeal(sparsity, non_sparse),
+    certificate=sparsity isa Sparsity.NoPattern ? non_sparse : SumOfSquares.Certificate.Sparsity.Ideal(sparsity, non_sparse),
     kws...
 )
     model = MOI.instantiate(solver, with_bridge_type=Float64)
@@ -34,11 +35,11 @@ function energy(H, maxdegree, solver;
     MOI.Bridges.add_bridge(model, PolyJuMP.ZeroPolynomialBridge{Complex{Float64}})
     MOI.Bridges.add_bridge(model, SumOfSquares.COI.Bridges.Variable.HermitianToSymmetricPSDBridge{Float64})
     MOI.Bridges.add_bridge(model, SumOfSquares.COI.Bridges.Constraint.SplitZeroBridge{Float64})
-    γ = MOI.SingleVariable(MOI.add_variable(model))
+    γ = MOI.add_variable(model)
     poly = convert(SpinPolynomial{Complex{Float64}}, H) - (1.0 + 0.0im) * γ
     c = SumOfSquares.add_constraint(model, poly, SOSCone(); ideal_certificate=certificate, kws...)
     MOI.set(model, MOI.ObjectiveSense(), MOI.MAX_SENSE)
-    MOI.set(model, MOI.ObjectiveFunction{MOI.SingleVariable}(), γ)
+    MOI.set(model, MOI.ObjectiveFunction{MOI.VariableIndex}(), γ)
     MOI.optimize!(model)
     if MOI.get(model, MOI.TerminationStatus()) != MOI.OPTIMAL
         @warn("Termination status: $(MOI.get(model, MOI.TerminationStatus())), $(MOI.get(model, MOI.RawStatusString()))")

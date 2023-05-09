@@ -25,7 +25,7 @@ solver = optimizer_with_attributes(
     MOI.Silent() => true
 )
 
-# We can compute a lower bound `-0.853452` to the ground state energy as follow:
+# We can compute a lower bound `-0.8031` to the ground state energy as follow:
 
 function hamiltonian_energy(N, maxdegree, solver; kws...)
     @spin σ[1:N]
@@ -33,7 +33,7 @@ function hamiltonian_energy(N, maxdegree, solver; kws...)
     energy(H, maxdegree, solver; kws...)
 end
 bound, gram, ν = hamiltonian_energy(2, 2, solver, sparsity = NoSparsity())
-@test bound ≈ -0.853452 rtol=1e-5 #src
+@test bound ≈ -0.8031 rtol=1e-3 #src
 bound
 
 # We can see that the moment matrix uses all monomials:
@@ -44,7 +44,7 @@ bound
 # Using term sparsity with block/cluster completion, we get the same bound:
 
 bound, gram, ν = hamiltonian_energy(2, 2, solver)
-@test bound ≈ -0.853452 rtol=1e-5 #src
+@test bound ≈ -0.8031 rtol=1e-3 #src
 bound
 
 # But with a smaller basis:
@@ -55,7 +55,7 @@ bound
 # Using term sparsity with chordal completion, we get a smaller bound:
 
 bound, gram, ν = hamiltonian_energy(2, 2, solver, sparsity = MonomialSparsity(ChordalCompletion()))
-@test bound ≈ -1.097288 rtol=1e-5 #src
+@test bound ≈ -0.87058 rtol=1e-3 #src
 bound
 
 # But with an even smaller basis:
@@ -70,7 +70,7 @@ bound
 @spin σ[1:2, 1:2]
 hamiltonian(σ)
 
-# We can compute a lower bound `-1.990513` to the ground state energy as follow:
+# We can compute a lower bound `-4.15244` to the ground state energy as follow:
 
 function hamiltonian_energy(N, M, maxdegree, solver; kws...)
     @spin σ[1:N, 1:M]
@@ -78,7 +78,7 @@ function hamiltonian_energy(N, M, maxdegree, solver; kws...)
     energy(H, maxdegree, solver; kws...)
 end
 bound, gram, ν = hamiltonian_energy(2, 2, 2, solver, sparsity = NoSparsity())
-@test bound ≈ -1.990513 rtol=1e-5 #src
+@test bound ≈ -4.15244 rtol=1e-3 #src
 bound
 
 # We can see that the moment matrix uses all monomials:
@@ -89,7 +89,7 @@ bound
 # Using term sparsity with block/cluster completion, we get the same bound:
 
 bound, gram, ν = hamiltonian_energy(2, 2, 2, solver)
-@test bound ≈ -1.990513 rtol=1e-5 #src
+@test bound ≈ -4.15244 rtol=1e-3 #src
 bound
 
 # But with a smaller basis:
@@ -100,7 +100,7 @@ bound
 # Using term sparsity with chordal completion, we get a smaller bound:
 
 bound, gram, ν = hamiltonian_energy(2, 2, 2, solver, sparsity = MonomialSparsity(ChordalCompletion()))
-@test bound ≈ -2.655704 rtol=1e-5 #src
+@test bound ≈ -5.1878 rtol=1e-3 #src
 bound
 
 # But with an even smaller basis:

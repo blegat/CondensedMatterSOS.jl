@@ -7,6 +7,8 @@
 
 using Test #src
 using CondensedMatterSOS
+import MultivariatePolynomials
+const MP = MultivariatePolynomials
 @spin σ[1:3]
 heisenberg_hamiltonian(σ, true)
 
@@ -16,36 +18,12 @@ using CSDP
 solver = optimizer_with_attributes(
     () -> MOIU.CachingOptimizer(MOIU.UniversalFallback(MOIU.Model{Float64}()), CSDP.Optimizer()),
     MOI.Silent() => false,
-)
+);
 
 # We can compute a lower bound `-2√2` to the ground state energy as follow:
 
-include(joinpath(dirname(dirname(pathof(CondensedMatterSOS))), "examples", "symmetry.jl"))
 function hamiltonian_energy(N, maxdegree, solver; symmetry=true, consecutive=false, kws...)
     @spin σ[1:N]
-    function action(mono::CondensedMatterSOS.SpinMonomial, el::DirectSum)
-        isempty(mono.variables) && return 1 * mono
-        sign = 1
-        vars = map(values(mono.variables)) do var
-            rel_id = var.id - σ[1][1].id
-            rel_index = var.index + 1
-            @assert σ[rel_index][rel_id + 1] == var
-            id = ((rel_id + el.c.id) % el.c.n) + σ[1][1].id
-            index = (rel_index^el.k.p) - 1
-            new_var = CondensedMatterSOS.SpinVariable(id, index)
-            if el.k.k.id != 0 && el.k.k.id != index + 1
-                sign *= -1
-            end
-            return new_var
-        end
-        return sign * CondensedMatterSOS.SpinMonomial(vars)
-    end
-    function action(term::CondensedMatterSOS.SpinTerm, el::DirectSum)
-        return MP.coefficient(term) * action(MP.monomial(term), el)
-    end
-    function action(poly::CondensedMatterSOS.SpinPolynomial, el::DirectSum)
-        return MP.polynomial([action(term, el) for term in MP.terms(poly)])
-    end
     H = heisenberg_hamiltonian(σ, true)
     G = Lattice1Group(N)
     cone = NonnegPolyInnerCone{SumOfSquares.COI.HermitianPositiveSemidefiniteConeTriangle}()
@@ -54,11 +32,9 @@ function hamiltonian_energy(N, maxdegree, solver; symmetry=true, consecutive=fal
         cone,
         MonomialBasis(MP.monomials(σ[1], 0:div(maxdegree, 2), consecutive=consecutive)),
     )
-    display(cert.basis.monomials)
-    certificate = SymmetricIdeal(
+    certificate = Symmetry.Ideal(
+        Symmetry.Pattern(G, Action(σ)),
         cert,
-        G,
-        action,
     )
     if symmetry
         energy(H, maxdegree, solver; certificate = certificate, kws...)
@@ -71,7 +47,7 @@ bound, gram, ν = hamiltonian_energy(
     2,
     solver,
     symmetry = false,
-    sparsity = NoSparsity(),
+    sparsity = SumOfSquares.Sparsity.NoPattern(),
 )
 @test bound ≈ -6 rtol=1e-6 #src
 bound

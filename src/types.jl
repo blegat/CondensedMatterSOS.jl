@@ -53,6 +53,10 @@ struct SpinTerm{T} <: MP.AbstractTerm{T}
     monomial::SpinMonomial
 end
 
+function MP.term(coefficient, monomial::SpinMonomial)
+    return SpinTerm(coefficient, monomial)
+end
+
 # TODO move to MP
 MP.convertconstant(::Type{SpinTerm{T}}, α) where {T} = convert(T, α) * MP.constantmonomial(SpinTerm{T})
 Base.copy(t::SpinTerm) = SpinTerm(MP.coefficient(t), copy(MP.monomial(t)))

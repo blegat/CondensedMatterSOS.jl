@@ -61,6 +61,20 @@ function Base.:*(a::SpinMonomial, b::SpinMonomial)
     end
     return coef * c
 end
+
+function Base.:*(a::SpinTerm, b::Union{SpinMonomial, SpinVariable})
+    t = MP.monomial(a) * b
+    return MP.term(MP.coefficient(a) * MP.coefficient(t), MP.monomial(t))
+end
+function Base.:*(a::Union{SpinMonomial, SpinVariable}, b::SpinTerm)
+    t = a * MP.monomial(b)
+    return MP.term(MP.coefficient(t) * MP.coefficient(b), MP.monomial(t))
+end
+function Base.:*(a::SpinTerm, b::SpinTerm)
+    t = a * MP.monomial(b)
+    return MP.term(MP.coefficient(t) * MP.coefficient(b), MP.monomial(t))
+end
+
 MP.multconstant(α, m::SpinMonomial) = SpinTerm(α, m)
 MP.multconstant(m::SpinMonomial, α) = SpinTerm(α, m)
 function Base.:(==)(a::SpinVariable, b::SpinVariable)
