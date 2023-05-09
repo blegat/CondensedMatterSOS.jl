@@ -31,12 +31,12 @@ end
 function _monomials(sites::Vector{Int}, deg::Int, filter::Function, monos, consecutive)
     if consecutive
         if deg == 0
-            _add_monomials!(monos, Int[], MP.constantmonomial(SpinMonomial), 1, filter)
+            _add_monomials!(monos, Int[], MP.constant_monomial(SpinMonomial), 1, filter)
             return monos
         end
         if deg >= length(sites)
             if deg == length(sites)
-                _add_monomials!(monos, sites, MP.constantmonomial(SpinMonomial), 1, filter)
+                _add_monomials!(monos, sites, MP.constant_monomial(SpinMonomial), 1, filter)
             end
             return monos
         end
@@ -48,11 +48,11 @@ function _monomials(sites::Vector{Int}, deg::Int, filter::Function, monos, conse
                 append!(active_sites, sites[1:(n-m)])
             end
             @assert length(active_sites) == deg
-            _add_monomials!(monos, active_sites, MP.constantmonomial(SpinMonomial), 1, filter)
+            _add_monomials!(monos, active_sites, MP.constant_monomial(SpinMonomial), 1, filter)
         end
     else
         for active_sites in combinations(sites, deg)
-            _add_monomials!(monos, active_sites, MP.constantmonomial(SpinMonomial), 1, filter)
+            _add_monomials!(monos, active_sites, MP.constant_monomial(SpinMonomial), 1, filter)
         end
     end
     return monos

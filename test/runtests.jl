@@ -66,7 +66,7 @@ end
 
 @testset "unsorted" begin
     @test sigmax[1]*sigmax[2] isa CMS.SpinTerm{Complex{Int}}
-    m = constantmonomial(sigmax[1])
+    m = constant_monomial(sigmax[1])
     @test m * m isa CMS.SpinTerm{Complex{Int}}
     @test collect(variables((sigmax[1]*sigmax[2]))) == [sigmax[1], sigmax[2]]
 end
@@ -152,7 +152,7 @@ using LinearAlgebra
 end
 
 @testset "monomials" begin
-    @test monovec([1, sigmax[1], sigmax[2]]) == [sigmax[1], sigmax[2], 1]
+    @test monomial_vector([1, sigmax[1], sigmax[2]]) == [sigmax[1], sigmax[2], 1]
     @test CMS.monomials([sigmax[1], sigmax[2]], 0) == [1]
     for consecutive in [false, true]
         @test MP.monomials([sigmax[1], sigmax[2]], 0, consecutive=consecutive) == [1]

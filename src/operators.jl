@@ -13,7 +13,7 @@ end
 function Base.:*(a::SpinVariable, b::SpinVariable)
     if a.id == b.id
         if a.index == b.index
-            return (1 + 0im) * MP.constantmonomial(a)
+            return (1 + 0im) * MP.constant_monomial(a)
             # We want to return `1` but in which type ?
             # We could use `Bool` type as it the type compatible with the most other types in Julia
             # but currently the convention is `Int` in MP, i.e. variables and monomials are `AbstractTerm{Int}`.
@@ -138,8 +138,8 @@ end
 compare(t1::SpinTerm, t2::SpinTerm) = monomial(t1) > monomial(t2)
 
 # TODO taken from TypedPolynomials
-join_terms_plus(terms1::AbstractArray{<:SpinTerm}, terms2::AbstractArray{<:SpinTerm}) = Sequences.mergesorted(terms1, terms2, compare, combine_plus)
-join_terms_minus(terms1::AbstractArray{<:SpinTerm}, terms2::AbstractArray{<:SpinTerm}) = Sequences.mergesorted(terms1, terms2, compare, combine_minus)
+join_terms_plus(terms1::AbstractArray{<:SpinTerm}, terms2::AbstractArray{<:SpinTerm}) = Sequences.merge_sorted(terms1, terms2, compare, combine_plus)
+join_terms_minus(terms1::AbstractArray{<:SpinTerm}, terms2::AbstractArray{<:SpinTerm}) = Sequences.merge_sorted(terms1, terms2, compare, combine_minus)
 
 Base.:+(p1::SpinPolynomial, p2::SpinPolynomial) = SpinPolynomial(join_terms_plus(MP.terms(p1), MP.terms(p2)))
 Base.:+(p::SpinPolynomial, t::SpinTerm) = SpinPolynomial(join_terms_plus(MP.terms(p), [t]))

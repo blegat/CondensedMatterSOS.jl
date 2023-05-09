@@ -58,7 +58,7 @@ function MP.term(coefficient, monomial::SpinMonomial)
 end
 
 # TODO move to MP
-MP.convertconstant(::Type{SpinTerm{T}}, α) where {T} = convert(T, α) * MP.constantmonomial(SpinTerm{T})
+MP.convert_constant(::Type{SpinTerm{T}}, α) where {T} = convert(T, α) * MP.constant_monomial(SpinTerm{T})
 Base.copy(t::SpinTerm) = SpinTerm(MP.coefficient(t), copy(MP.monomial(t)))
 MA.mutable_copy(t::SpinTerm) = SpinTerm(MA.copy_if_mutable(MP.coefficient(t)), copy(MP.monomial(t)))
 
@@ -198,20 +198,20 @@ function MP.polynomial(t::SpinTerm{T}, ::Type{T}) where T
     return SpinPolynomial([t])
 end
 function MP.polynomial(t::SpinTerm, T::Type)
-    return MP.polynomial(MP.changecoefficienttype(t, T), T)
+    return MP.polynomial(similar(t, T), T)
 end
 function MP.polynomial(p::SpinPolynomial, T::Type)
-    return SpinPolynomial(MP.changecoefficienttype.(MP.terms(p), T))
+    return SpinPolynomial(similar.(MP.terms(p), T))
 end
 
 const SpinLike = Union{SpinVariable, SpinMonomial, SpinTerm, SpinPolynomial}
 MP.variable_union_type(::Union{SpinLike, Type{<:SpinLike}}) = SpinVariable
-MP.monomialtype(::Type{<:SpinLike}) = SpinMonomial
-function MP.constantmonomial(::Union{SpinLike, Type{<:SpinLike}})
+MP.monomial_type(::Type{<:SpinLike}) = SpinMonomial
+function MP.constant_monomial(::Union{SpinLike, Type{<:SpinLike}})
     return SpinMonomial(SpinVariable[])
 end
-MP.termtype(::Union{SpinLike, Type{<:SpinLike}}, T::Type) = SpinTerm{T}
-MP.polynomialtype(::Union{SpinLike, Type{<:SpinLike}}, T::Type) = SpinPolynomial{T}
+MP.term_type(::Union{SpinLike, Type{<:SpinLike}}, T::Type) = SpinTerm{T}
+MP.polynomial_type(::Union{SpinLike, Type{<:SpinLike}}, T::Type) = SpinPolynomial{T}
 
 # #With this I solve 2*sx[1]<sx[1]
 # function SpinTerm{T}(spin::Union{SpinVariable, SpinMonomial}) where T
