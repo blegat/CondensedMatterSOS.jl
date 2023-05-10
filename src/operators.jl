@@ -62,21 +62,6 @@ function Base.:*(a::SpinMonomial, b::SpinMonomial)
     return coef * c
 end
 
-function Base.:*(a::SpinTerm, b::Union{SpinMonomial, SpinVariable})
-    t = MP.monomial(a) * b
-    return MP.term(MP.coefficient(a) * MP.coefficient(t), MP.monomial(t))
-end
-function Base.:*(a::Union{SpinMonomial, SpinVariable}, b::SpinTerm)
-    t = a * MP.monomial(b)
-    return MP.term(MP.coefficient(t) * MP.coefficient(b), MP.monomial(t))
-end
-function Base.:*(a::SpinTerm, b::SpinTerm)
-    t = a * MP.monomial(b)
-    return MP.term(MP.coefficient(t) * MP.coefficient(b), MP.monomial(t))
-end
-
-MP.multconstant(α, m::SpinMonomial) = SpinTerm(α, m)
-MP.multconstant(m::SpinMonomial, α) = SpinTerm(α, m)
 function Base.:(==)(a::SpinVariable, b::SpinVariable)
     return (a.id==b.id) && (a.index==b.index)
 end
@@ -122,28 +107,12 @@ function Base.isless(a::SpinMonomial, b::SpinMonomial)
     end
     return false
 end
-
-combine_plus(t1::SpinTerm, t2::SpinTerm) = (MP.coefficient(t1) + MP.coefficient(t2)) * MP.monomial(t1)
-combine_plus(t::SpinTerm, ::MA.Zero) = MA.mutable_copy(t)
-combine_plus(::MA.Zero, t::SpinTerm) = MA.mutable_copy(t)
-combine_minus(t1::SpinTerm, t2::SpinTerm) = (MP.coefficient(t1) - MP.coefficient(t2)) * MP.monomial(t1)
-combine_minus(t::SpinTerm, ::MA.Zero) = MA.mutable_copy(t)
-combine_minus(::MA.Zero, t::SpinTerm) = -t
-function MA.promote_operation(::typeof(combine_plus), ::Type{SpinTerm{S}}, ::Type{SpinTerm{T}}) where {S, T}
-    return SpinTerm{MA.promote_operation(+, S, T)}
+function MP.grlex(a::SpinMonomial, b::SpinMonomial)
+    if a == b
+        return 0
+    elseif a < b
+        return -1
+    else
+        return 1
+    end
 end
-function MA.promote_operation(::typeof(combine_minus), ::Type{SpinTerm{S}}, ::Type{SpinTerm{T}}) where {S, T}
-    return SpinTerm{MA.promote_operation(-, S, T)}
-end
-compare(t1::SpinTerm, t2::SpinTerm) = monomial(t1) > monomial(t2)
-
-# TODO taken from TypedPolynomials
-join_terms_plus(terms1::AbstractArray{<:SpinTerm}, terms2::AbstractArray{<:SpinTerm}) = Sequences.merge_sorted(terms1, terms2, compare, combine_plus)
-join_terms_minus(terms1::AbstractArray{<:SpinTerm}, terms2::AbstractArray{<:SpinTerm}) = Sequences.merge_sorted(terms1, terms2, compare, combine_minus)
-
-Base.:+(p1::SpinPolynomial, p2::SpinPolynomial) = SpinPolynomial(join_terms_plus(MP.terms(p1), MP.terms(p2)))
-Base.:+(p::SpinPolynomial, t::SpinTerm) = SpinPolynomial(join_terms_plus(MP.terms(p), [t]))
-Base.:+(t::SpinTerm, p::SpinPolynomial) = p + t
-Base.:-(p1::SpinPolynomial, p2::SpinPolynomial) = SpinPolynomial(join_terms_minus(MP.terms(p1), MP.terms(p2)))
-Base.:-(p::SpinPolynomial, t::SpinTerm) = SpinPolynomial(join_terms_minus(MP.terms(p), [t]))
-Base.:-(t::SpinTerm, p::SpinPolynomial) = SpinPolynomial(join_terms_minus([t], MP.terms(p)))

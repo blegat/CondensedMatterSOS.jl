@@ -1,8 +1,6 @@
-using MultivariatePolynomials
-const MP = MultivariatePolynomials
+import MultivariatePolynomials as MP
 using Test
 using CondensedMatterSOS
-
 const CMS = CondensedMatterSOS;
 
 @spin sigma[1:4];
@@ -65,10 +63,10 @@ end
 
 
 @testset "unsorted" begin
-    @test sigmax[1]*sigmax[2] isa CMS.SpinTerm{Complex{Int}}
-    m = constant_monomial(sigmax[1])
-    @test m * m isa CMS.SpinTerm{Complex{Int}}
-    @test collect(variables((sigmax[1]*sigmax[2]))) == [sigmax[1], sigmax[2]]
+    @test sigmax[1]*sigmax[2] isa MP.Term{Complex{Int}}
+    m = MP.constant_monomial(sigmax[1])
+    @test m * m isa MP.Term{Complex{Int}}
+    @test collect(MP.variables((sigmax[1]*sigmax[2]))) == [sigmax[1], sigmax[2]]
 end
 
 @testset "monomials and terms" begin
@@ -106,7 +104,7 @@ end
     end
     test_equal(-sigmax[1] * sigmax[2] - sigmax[2] * sigmax[1], -2sigmax[1] * sigmax[2])
     test_equal(sum(sigmaz), sigmaz[1] + sigmaz[2] + sigmaz[3] + sigmaz[4])
-    @test variables(sum(sigmaz)) == sigmaz
+    @test MP.variables(sum(sigmaz)) == sigmaz
     test_equal(sigmax[1] + 1 - sigmax[1], 1)
     test_equal(sigmax[1] + sigmax[2] - sigmax[3], sigmax[1] - sigmax[3] + sigmax[2])
     test_equal(sigmax[1] - sigmax[2] + sigmax[3], sigmax[1] + sigmax[3] - sigmax[2])
@@ -140,11 +138,12 @@ end
 
 using LinearAlgebra
 @testset "matvec with $v" for v in (sigmax[1:2], [1, sigmax[1]], [sigmax[1], sigmay[1]])
+    @show v
     exp = v[1]*v[2] + v[2]*v[1] + v[1]^2 + v[2]^2
     @test v' * ones(2, 2) * v == exp
     @test v' * ones(Int, 2, 2) * v == exp
     vv = v * v'
-    @test vv isa Matrix{CMS.SpinTerm{Complex{Int}}}
+    @test vv isa Matrix{MP.Term{Complex{Int},CMS.SpinMonomial}}
     @test dot(vv, ones(2, 2)) == exp
     @test dot(vv, ones(Int, 2, 2)) == exp
     @test sum(vv .* ones(2, 2)) == exp
@@ -152,7 +151,7 @@ using LinearAlgebra
 end
 
 @testset "monomials" begin
-    @test monomial_vector([1, sigmax[1], sigmax[2]]) == [sigmax[1], sigmax[2], 1]
+    @test MP.monomial_vector([1, sigmax[1], sigmax[2]]) == [1, sigmax[2], sigmax[1]]
     @test CMS.monomials([sigmax[1], sigmax[2]], 0) == [1]
     for consecutive in [false, true]
         @test MP.monomials([sigmax[1], sigmax[2]], 0, consecutive=consecutive) == [1]
