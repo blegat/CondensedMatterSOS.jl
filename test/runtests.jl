@@ -137,17 +137,23 @@ end
 end
 
 using LinearAlgebra
-@testset "matvec with $v" for v in (sigmax[1:2], [1, sigmax[1]], [sigmax[1], sigmay[1]])
-    @show v
-    exp = v[1]*v[2] + v[2]*v[1] + v[1]^2 + v[2]^2
-    @test v' * ones(2, 2) * v == exp
-    @test v' * ones(Int, 2, 2) * v == exp
+
+function _test_matvec(v, M, exp)
+    @test v' * M * v == exp
+    Mv = M * v
+    @test v' * Mv == exp
+    vM = v' * M
+    @test vM * v == exp
     vv = v * v'
     @test vv isa Matrix{MP.Term{Complex{Int},CMS.SpinMonomial}}
-    @test dot(vv, ones(2, 2)) == exp
-    @test dot(vv, ones(Int, 2, 2)) == exp
-    @test sum(vv .* ones(2, 2)) == exp
-    @test sum(vv .* ones(Int, 2, 2)) == exp
+    @test dot(vv, M) == exp
+    @test sum(vv .* M) == exp
+end
+
+@testset "matvec with $v" for v in (sigmax[1:2], [1, sigmax[1]], [sigmax[1], sigmay[1]])
+    exp = v[1]*v[2] + v[2]*v[1] + v[1]^2 + v[2]^2
+    _test_matvec(v, ones(2, 2), exp)
+    _test_matvec(v, ones(Int, 2, 2), exp)
 end
 
 @testset "monomials" begin

@@ -1,3 +1,7 @@
+function MA.promote_operation(::typeof(*), ::Type{<:SpinLike}, ::Type{<:SpinLike})
+    return MP.term_type(SpinMonomial, Complex{Int})
+end
+
 function _coef_variable(a::SpinVariable, b::SpinVariable)
     i = a.index
     j = b.index

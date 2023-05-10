@@ -183,3 +183,4 @@ MP.monomial_type(::Type{<:SpinLike}) = SpinMonomial
 function MP.constant_monomial(::Union{SpinLike, Type{<:SpinLike}})
     return SpinMonomial(SpinVariable[])
 end
+MP.multiplication_preserves_monomial_order(::Type{SpinMonomial}) = false
