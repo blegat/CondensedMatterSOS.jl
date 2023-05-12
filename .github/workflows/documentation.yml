@@ -15,8 +15,19 @@ jobs:
           # Build documentation on the latest Julia 1.x
           version: '1'
       - name: Install dependencies
-        run: julia --project=docs/ -e 'using Pkg; Pkg.instantiate();
-                                       Pkg.develop(PackageSpec(path=pwd()))'
+        shell: julia --project=docs {0}
+        run: |
+          using Pkg
+          Pkg.add([
+              PackageSpec(name="SemialgebraicSets", rev="master"),
+              PackageSpec(name="MultivariateMoments", rev="master"),
+              PackageSpec(name="MultivariateBases", rev="master"),
+              PackageSpec(name="MultivariatePolynomials", rev="master"),
+              PackageSpec(name="SumOfSquares", rev="master"),
+              PackageSpec(name="PolyJuMP", rev="master"),
+          ])
+          Pkg.instantiate()
+          Pkg.develop(PackageSpec(path=pwd()))
       - name: Build and deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # For authentication with GitHub Actions token
