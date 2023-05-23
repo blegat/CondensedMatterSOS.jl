@@ -35,9 +35,6 @@ function MP.name_base_indices(var::SpinVariable) # Used to print variable
     end
 end
 
-include("sequences.jl")
-import .Sequences
-
 include("operators.jl")
 include("monom-set.jl")
 
