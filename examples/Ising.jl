@@ -42,8 +42,8 @@ bound
 
 # But with a smaller basis:
 
-@test length(ν.sub_moment_matrices) == 2 #src
-[M.basis.monomials for M in ν.sub_moment_matrices]
+@test length(ν.blocks) == 2 #src
+[M.basis.monomials for M in ν.blocks]
 
 # Using term sparsity with chordal completion, we get a smaller bound:
 
@@ -53,5 +53,5 @@ bound
 
 # But with an even smaller basis:
 
-@test length(ν.sub_moment_matrices) == 5 #src
-[M.basis.monomials for M in ν.sub_moment_matrices]
+@test length(ν.blocks) == 5 #src
+[M.basis.monomials for M in ν.blocks]

@@ -74,10 +74,10 @@ bound
 # The reduction is obtained by block diagonalizing with a change of polynomial
 # basis to the isotypical basis.
 
-display([M.basis.polynomials for M in ν.sub_moment_matrices])
+display([M.basis.polynomials for M in ν.blocks])
 
-@test length(ν.sub_moment_matrices) == 7 #src
-[M.basis.polynomials for M in ν.sub_moment_matrices]
+@test length(ν.blocks) == 7 #src
+[M.basis.polynomials for M in ν.blocks]
 
 # Let's try this for 3 sites. First without symmetry.
 
@@ -102,7 +102,7 @@ bound, gram, ν = hamiltonian_energy(
 
 # Let's look at the isotypical basis.
 
-display([M.basis.polynomials for M in ν.sub_moment_matrices])
+display([M.basis.polynomials for M in ν.blocks])
 
 # Now let's define a function for our common use case.
 
@@ -118,7 +118,7 @@ function f(L, d=1, consecutive=false; symmetry=true)
         symmetry=symmetry,
     )
     @show bound
-    for M in ν.sub_moment_matrices
+    for M in ν.blocks
         display(round.(M.basis.polynomials, digits=6))
     end
     println("E/N = ", bound / L)
