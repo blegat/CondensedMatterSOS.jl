@@ -13,13 +13,13 @@ D = 3*sigmax[1]*sigmax[2];
 
 @testset "show" begin
     @test sprint(show, A) == "(0 - 7im)sigmaˣ₂sigmaᶻ₃"
-    @test sprint(show, MIME"text/print"(), A) == "(0 - 7im)*sigmax[2]*sigmaz[3]"
+    @test sprint(show, MIME"text/print"(), A) == "(0 - 7im)*sigmaˣ[2]*sigmaᶻ[3]"
     @test sprint(show, B) == "sigmaˣ₁sigmaˣ₂"
-    @test sprint(show, MIME"text/print"(), B) == "sigmax[1]*sigmax[2]"
+    @test sprint(show, MIME"text/print"(), B) == "sigmaˣ[1]*sigmaˣ[2]"
     @test sprint(show, C) == "sigmaˣ₃sigmaʸ₄"
-    @test sprint(show, MIME"text/print"(), C) == "sigmax[3]*sigmay[4]"
+    @test sprint(show, MIME"text/print"(), C) == "sigmaˣ[3]*sigmaʸ[4]"
     @test sprint(show, D) == "(3 + 0im)sigmaˣ₁sigmaˣ₂"
-    @test sprint(show, MIME"text/print"(), D) == "(3 + 0im)*sigmax[1]*sigmax[2]"
+    @test sprint(show, MIME"text/print"(), D) == "(3 + 0im)*sigmaˣ[1]*sigmaˣ[2]"
 end
 
 # test that in addition to `x == y`, we

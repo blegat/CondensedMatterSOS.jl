@@ -29,7 +29,7 @@ end
 
 Base.copy(m::SpinMonomial) = SpinMonomial(copy(m.variables))
 MP.isconstant(mono::SpinMonomial) = iszero(length(mono.variables))
-Base.convert(::Type{SpinMonomial}, spin::SpinVariable) = monomial(spin)
+Base.convert(::Type{SpinMonomial}, spin::SpinVariable) = MP.monomial(spin)
 MP.monomial(spin::SpinVariable) = SpinMonomial([spin])
 function MP.exponents(spin::SpinMonomial)
    #There must be a 1to1 corresponendence between variables and exponents
@@ -41,10 +41,8 @@ function MP.degree(spin::SpinMonomial, variable::SpinVariable)
     var = get(spin.variables, variable.id, nothing)
     return (var === nothing || var.index != variable.index) ? 0 : 1
 end
-function MP.powers(m::CondensedMatterSOS.SpinMonomial)
-    # TODO maybe use MappedArrays.jl here so that ẁe can hardcode the `eltype`
-    #      as `eltype(::Base.Generator)` is `Any`.
-    return Base.Generator(v -> (v, 1), variables(m))
+function MP.powers(m::SpinMonomial)
+    return MP.LazyMap{Tuple{SpinVariable,Int}}(Base.Fix2(tuple, 1), MP.variables(m))
 end
 
 MP.variables(spin::SpinMonomial) = collect(values(spin.variables))
@@ -59,7 +57,7 @@ MP.polynomial_type(::Type{MP.Term{C,M} where C}) where {M<:SpinMonomial} = MP.Po
 function MP.variables(monos::AbstractVector{SpinMonomial})
     vars = Set{SpinVariable}()
     for mono in monos
-        union!(vars, variables(mono))
+        union!(vars, MP.variables(mono))
     end
     return sort(collect(vars), rev=true)
 end

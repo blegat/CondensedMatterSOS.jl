@@ -111,7 +111,7 @@ function Base.isless(a::SpinMonomial, b::SpinMonomial)
     end
     return false
 end
-function MP.grlex(a::SpinMonomial, b::SpinMonomial)
+function MP.compare(a::SpinMonomial, b::SpinMonomial)
     if a == b
         return 0
     elseif a < b
