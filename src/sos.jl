@@ -32,9 +32,7 @@ function energy(H, maxdegree, solver;
     MOI.Bridges.add_bridge(model, SumOfSquares.Bridges.Constraint.SOSPolynomialBridge{Complex{Float64}})
     MOI.Bridges.add_bridge(model, SumOfSquares.Bridges.Constraint.EmptyBridge{Float64})
     MOI.Bridges.add_bridge(model, SumOfSquares.Bridges.Constraint.PositiveSemidefinite2x2Bridge{Float64})
-    MOI.Bridges.add_bridge(model, PolyJuMP.ZeroPolynomialBridge{Complex{Float64}})
-    MOI.Bridges.add_bridge(model, SumOfSquares.COI.Bridges.Variable.HermitianToSymmetricPSDBridge{Float64})
-    MOI.Bridges.add_bridge(model, SumOfSquares.COI.Bridges.Constraint.SplitZeroBridge{Float64})
+    MOI.Bridges.add_bridge(model, PolyJuMP.Bridges.Constraint.ZeroPolynomialBridge{Complex{Float64}})
     γ = MOI.add_variable(model)
     poly = convert(MP.Polynomial{Complex{Float64}}, H) - (1.0 + 0.0im) * γ
     c = SumOfSquares.add_constraint(model, poly, SOSCone(); ideal_certificate=certificate, kws...)
