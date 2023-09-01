@@ -26,7 +26,7 @@ function hamiltonian_energy(N, maxdegree, solver; symmetry=true, consecutive=fal
     @spin σ[1:N]
     H = heisenberg_hamiltonian(σ, true)
     G = Lattice1Group(N)
-    cone = NonnegPolyInnerCone{SumOfSquares.COI.HermitianPositiveSemidefiniteConeTriangle}()
+    cone = NonnegPolyInnerCone{MOI.HermitianPositiveSemidefiniteConeTriangle}()
     @assert iseven(maxdegree)
     cert = SumOfSquares.Certificate.FixedBasis(
         cone,
