@@ -6,7 +6,7 @@ export energy
 
 """
     energy(H, maxdegree, solver;
-        cone=NonnegPolyInnerCone{SumOfSquares.COI.HermitianPositiveSemidefiniteConeTriangle}(),
+        cone=NonnegPolyInnerCone{MOI.HermitianPositiveSemidefiniteConeTriangle}(),
         sparsity=MonomialSparsity(),
         non_sparse=SumOfSquares.Certificate.MaxDegree(cone, MonomialBasis, maxdegree),
         certificate=sparsity isa NoSparsity ? non_sparse : SumOfSquares.Certificate.SparseIdeal(sparsity, non_sparse),
@@ -22,7 +22,7 @@ is `certificate`. The rest of the keywords are passed to the `@constraint` macro
 of the SumOfSquares package.
 """
 function energy(H, maxdegree, solver;
-    cone=NonnegPolyInnerCone{SumOfSquares.COI.HermitianPositiveSemidefiniteConeTriangle}(),
+    cone=NonnegPolyInnerCone{MOI.HermitianPositiveSemidefiniteConeTriangle}(),
     sparsity=Sparsity.Monomial(),
     non_sparse=SumOfSquares.Certificate.MaxDegree(cone, MonomialBasis, maxdegree),
     certificate=sparsity isa Sparsity.NoPattern ? non_sparse : SumOfSquares.Certificate.Sparsity.Ideal(sparsity, non_sparse),
