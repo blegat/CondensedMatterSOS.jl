@@ -1,9 +1,24 @@
 using SumOfSquares
 using GroupsCore
+
 using PermutationGroups
+symmetric_group(n) = PermutationGroups.PermGroup(PermutationGroups.Perm([2,1]), PermutationGroups.Perm([2:n;1]))
+const G3 = symmetric_group(3)
+const P3 = collect(G3)
 
 export Lattice1Group
 
+"""
+    struct KleinElement <: GroupElement
+        id::Int
+    end
+
+The transformation:
+* (σx, σy) → (-σx, -σy)
+* (σy, σz) → (-σy, -σz)
+* (σz, σx) → (-σz, -σx)
+form a the Klein group.
+"""
 struct KleinElement <: GroupElement
     id::Int
 end
@@ -28,7 +43,7 @@ struct KleinGroup <: Group end
 Base.one(::Union{KleinGroup, KleinElement}) = KleinElement(0)
 PermutationGroups.gens(::KleinGroup) = [KleinElement(1), KleinElement(2)]
 PermutationGroups.order(::Type{T}, G::KleinGroup) where {T} = convert(T, 4)
-function Base.iterate(::KleinGroup, prev::KleinElement=KleinElement(-1))
+function Base.iterate(::KleinGroup, prev::KleinElement = KleinElement(-1))
     id = prev.id + 1
     if id > 4
         return nothing
@@ -40,7 +55,7 @@ end
 
 #SymbolicWedderburn.conjugacy_classes_orbit(KleinGroup())
 
-function perm_klein(k::KleinElement, p::Perm)
+function perm_klein(k::KleinElement, p::PermutationGroups.Permutation)
     if k.id == 0
         return k
     else
@@ -52,7 +67,7 @@ end
 Group element `k * p = p * k^inv(p)`.
 """
 struct KleinPermElement <: GroupElement
-    p::Perm{Int}
+    p::eltype(P3)
     k::KleinElement
 end
 Base.isone(el::KleinPermElement) = isone(el.k) && isone(el.p)
@@ -93,18 +108,16 @@ function PermutationGroups.order(el::KleinPermElement)
 end
 
 struct KleinPermGroup <: Group end
-Base.one(::Union{KleinPermGroup, KleinPermElement}) = KleinPermElement(Perm(3), one(KleinGroup()))
+Base.one(::Union{KleinPermGroup, KleinPermElement}) = KleinPermElement(one(G3), one(KleinGroup()))
 # See https://github.com/blegat/CondensedMatterSOS.jl/pull/31#issuecomment-1717665659
-symmetric_group(n) = PermutationGroups.PermGroup(PermutationGroups.Perm([2,1]), PermutationGroups.Perm([2:n;1]))
-function PermutationGroups.gens(::KleinPermGroup)
-    els = [KleinPermElement(Perm(3), KleinElement(1))]
-    for g in gens(symmetric_group(3))
+function PermutationGroups.gens(g::KleinPermGroup)
+    els = [one(g)]
+    for g in gens(G3)
         push!(els, KleinPermElement(g, one(KleinGroup())))
     end
     return els
 end
 PermutationGroups.order(::Type{T}, G::KleinPermGroup) where {T} = convert(T, 6 * 4)
-const P3 = collect(symmetric_group(3))
 const IT = Iterators.product(1:6, 0:3)
 function Base.iterate(::KleinPermGroup, args...)
     el_st = iterate(IT, args...)
