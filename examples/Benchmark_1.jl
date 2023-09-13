@@ -7,18 +7,14 @@
 
 using Test #src
 using CondensedMatterSOS
-import MultivariatePolynomials
-const MP = MultivariatePolynomials
+import MultivariatePolynomials as MP
 @spin σ[1:3]
 heisenberg_hamiltonian(σ, true)
 
 ## Let's pick a solver from [this list](https://jump.dev/JuMP.jl/dev/installation/#Getting-Solvers).
 
-using CSDP
-solver = optimizer_with_attributes(
-    () -> MOIU.CachingOptimizer(MOIU.UniversalFallback(MOIU.Model{Float64}()), CSDP.Optimizer()),
-    MOI.Silent() => false,
-);
+import Clarabel
+solver = Clarabel.Optimizer
 
 # We can compute a lower bound `-2√2` to the ground state energy as follow:
 

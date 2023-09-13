@@ -28,21 +28,17 @@ function energy(H, maxdegree, solver;
     certificate=sparsity isa Sparsity.NoPattern ? non_sparse : SumOfSquares.Certificate.Sparsity.Ideal(sparsity, non_sparse),
     kws...
 )
-    model = MOI.instantiate(solver, with_bridge_type=Float64)
-    MOI.Bridges.add_bridge(model, SumOfSquares.Bridges.Constraint.SOSPolynomialBridge{Complex{Float64}})
-    MOI.Bridges.add_bridge(model, SumOfSquares.Bridges.Constraint.EmptyBridge{Float64})
-    MOI.Bridges.add_bridge(model, SumOfSquares.Bridges.Constraint.PositiveSemidefinite2x2Bridge{Float64})
-    MOI.Bridges.add_bridge(model, PolyJuMP.Bridges.Constraint.ZeroPolynomialBridge{Complex{Float64}})
-    γ = MOI.add_variable(model)
+    model = Model(solver)
+    @variable(model, γ)
     poly = convert(MP.Polynomial{Complex{Float64}}, H) - (1.0 + 0.0im) * γ
-    c = SumOfSquares.add_constraint(model, poly, SOSCone(); ideal_certificate=certificate, kws...)
-    MOI.set(model, MOI.ObjectiveSense(), MOI.MAX_SENSE)
-    MOI.set(model, MOI.ObjectiveFunction{MOI.VariableIndex}(), γ)
-    MOI.optimize!(model)
-    if MOI.get(model, MOI.TerminationStatus()) != MOI.OPTIMAL
-        @warn("Termination status: $(MOI.get(model, MOI.TerminationStatus())), $(MOI.get(model, MOI.RawStatusString()))")
+    cone = NonnegPolyInnerCone{MOI.HermitianPositiveSemidefiniteConeTriangle}()
+    c = @constraint(model, poly in cone, ideal_certificate = certificate, kws...)
+    @objective(model, Max, γ)
+    optimize!(model)
+    if termination_status(model) != MOI.OPTIMAL
+        @warn("Termination status: $(termination_status(model)), $(raw_status(model))")
     end
-    gram = MOI.get(model, SumOfSquares.GramMatrixAttribute(), c)
+    gram = gram_matrix(c)
     ν = MOI.get(model, SumOfSquares.MomentMatrixAttribute(), c)
-    MOI.get(model, MOI.ObjectiveValue()), gram, ν
+    objective_value(model), gram, ν
 end
