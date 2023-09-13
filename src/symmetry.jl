@@ -94,15 +94,17 @@ end
 
 struct KleinPermGroup <: Group end
 Base.one(::Union{KleinPermGroup, KleinPermElement}) = KleinPermElement(Perm(3), one(KleinGroup()))
+# See https://github.com/blegat/CondensedMatterSOS.jl/pull/31#issuecomment-1717665659
+symmetric_group(n) = PermutationGroups.PermGroup(PermutationGroups.Perm([2,1]), PermutationGroups.Perm([2:n;1]))
 function PermutationGroups.gens(::KleinPermGroup)
     els = [KleinPermElement(Perm(3), KleinElement(1))]
-    for g in gens(PermutationGroups.SymmetricGroup(3))
+    for g in gens(symmetric_group(3))
         push!(els, KleinPermElement(g, one(KleinGroup())))
     end
     return els
 end
 PermutationGroups.order(::Type{T}, G::KleinPermGroup) where {T} = convert(T, 6 * 4)
-const P3 = collect(PermutationGroups.SymmetricGroup(3))
+const P3 = collect(symmetric_group(3))
 const IT = Iterators.product(1:6, 0:3)
 function Base.iterate(::KleinPermGroup, args...)
     el_st = iterate(IT, args...)
