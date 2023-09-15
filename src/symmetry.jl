@@ -130,12 +130,11 @@ function Base.rand(rng::Random.AbstractRNG, ::Random.SamplerTrivial{KleinPermGro
 end
 
 function Base.deepcopy_internal(g::KleinPermElement, dict::IdDict)
-    p = if haskey(dict, objectid(g.p))
-        dict[objectid(g.p)]
-    else
-        Base.deepcopy_internal(g.p, dict)
-    end
-    return KleinPermElement(p, g.k)
+    haskey(dict, g) && return dict[g]
+
+    h = KleinPermElement(Base.deepcopy_internal(g.p, dict), g.k)
+    dict[g] = h
+    return h
 end
 
 # CyclicGroup
@@ -233,22 +232,24 @@ function Base.rand(rng::Random.AbstractRNG, st::Random.SamplerTrivial{<:DirectSu
 end
 
 function Base.deepcopy_internal(g::DirectSumElem, dict::IdDict)
+    haskey(dict, g) && return g
     h = if isbits(g.h)
         g.h
-    elseif haskey(dict, objectid(g.h))
-        dict[objectid(g.h)]
+    elseif haskey(dict, g.h)
+        dict[g.h]
     else
         Base.deepcopy_internal(g.h, dict)
     end
-
     k = if isbits(g.k)
         g.k
-    elseif haskey(dict, objectid(g.k))
-        dict[objectid(g.k)]
+    elseif haskey(dict, g.k)
+        dict[g.k]
     else
         Base.deepcopy_internal(g.k, dict)
     end
-    return DirectSumElem(h, k)
+    new_g = DirectSumElem(h, k)
+    dict[g] = new_g
+    return new_g
 end
 
 # two aliases
