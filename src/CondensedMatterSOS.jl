@@ -41,6 +41,8 @@ include("monom-set.jl")
 include("ising.jl")
 
 include("symmetry.jl")
+export Lattice1Group
+
 include("action.jl")
 include("sos.jl")
 
