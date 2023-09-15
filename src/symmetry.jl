@@ -68,8 +68,12 @@ struct KleinPermElement <: GroupElement
 end
 
 function GroupsCore.gens(::KleinPermGroup)
+    sym3_gens = __symmetric_grp_gens(3)
     Kid = one(KleinGroup())
-    return [KleinPermElement(g, Kid) for g in __symmetric_grp_gens(3)]
+    elts = [KleinPermElement(g, Kid) for g in sym3_gens]
+    Pid = one(first(sym3_gens))
+    append!(elts, KleinPermElement(Pid, k) for k in gens(KleinGroup()))
+    return elts
 end
 GroupsCore.order(::Type{T}, G::KleinPermGroup) where {T} = convert(T, 6 * 4)
 Base.IteratorSize(::Type{KleinPermGroup}) = Base.HasShape{2}()
