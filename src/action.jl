@@ -1,3 +1,4 @@
+import SumOfSquares.Symmetry
 export Action
 
 struct Action <: Symmetry.OnMonomials

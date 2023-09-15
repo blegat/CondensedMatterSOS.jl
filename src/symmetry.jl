@@ -1,4 +1,3 @@
-using SumOfSquares
 import Random
 using GroupsCore
 
@@ -7,8 +6,6 @@ function __symmetric_grp_gens(n::Integer)
     return (Perm(UInt16[2, 1], false), Perm(UInt16[2:n; 1], false))
 end
 symmetric_group(n::Integer) = PermGroup(__symmetric_grp_gens(n)...)
-
-export Lattice1Group
 
 ## Klein C₂⊕C₂ group
 struct KleinGroup <: Group end
