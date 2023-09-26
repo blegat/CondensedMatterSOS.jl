@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Glass · CondensedMatterSOS</title><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.045/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.24/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">CondensedMatterSOS</a></span></div><form class="docs-search" action="../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../">Introduction</a></li><li><span class="tocitem">Examples</span><ul><li><a class="tocitem" href="../Benchmark_1/">Benchmark_1</a></li><li class="is-active"><a class="tocitem" href>Glass</a><ul class="internal"><li><a class="tocitem" href="#D"><span>1D</span></a></li><li><a class="tocitem" href="#D-2"><span>2D</span></a></li></ul></li><li><a class="tocitem" href="../Ising/">Ising</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li class="is-active"><a href>Glass</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Glass</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/blegat/CondensedMatterSOS.jl/blob/master/examples/Glass.jl" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Ising-spin-glass-model"><a class="docs-heading-anchor" href="#Ising-spin-glass-model">Ising spin glass model</a><a id="Ising-spin-glass-model-1"></a><a class="docs-heading-anchor-permalink" href="#Ising-spin-glass-model" title="Permalink"></a></h1><p><a href="https://mybinder.org/v2/gh/blegat/CondensedMatterSOS.jl/gh-pages?filepath=previews/PR31/generated/Ising.ipynb"><img src="https://mybinder.org/badge_logo.svg" alt/></a> <a href="https://nbviewer.jupyter.org/github/blegat/CondensedMatterSOS.jl/blob/gh-pages/previews/PR31/generated/Ising.ipynb"><img src="https://img.shields.io/badge/show-nbviewer-579ACA.svg" alt/></a></p><h2 id="D"><a class="docs-heading-anchor" href="#D">1D</a><a id="D-1"></a><a class="docs-heading-anchor-permalink" href="#D" title="Permalink"></a></h2><p>We study the Hamiltonian of the transverse-field Ising spin glass model without periodic boundary conditions and transverse field <code>g</code> set to 0.4.</p><pre><code class="language-julia hljs">import Random
+using CondensedMatterSOS
+@spin σ[1:2]
+function hamiltonian(σ)
+    Random.seed!(1) # We set the seed so that the results of this example are reproducible.
+    return ising_glass_hamiltonian(σ, 0.4, false)
+end
+hamiltonian(σ)</code></pre><p class="math-container">\[ (-0.4 + 0.0im)σᶻ_{2} + (-0.4 + 0.0im)σᶻ_{1} + (-0.07058313895389791 - 0.0im)σˣ_{1}σˣ_{2} \]</p><p>Let&#39;s pick a solver from <a href="https://jump.dev/JuMP.jl/dev/installation/#Getting-Solvers">this list</a>.</p><pre><code class="language-julia hljs">import Clarabel
+solver = Clarabel.Optimizer</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Clarabel.MOIwrapper.Optimizer</code></pre><p>We can compute a lower bound <code>-0.8031</code> to the ground state energy as follow:</p><pre><code class="language-julia hljs">function hamiltonian_energy(N, maxdegree, solver; kws...)
+    @spin σ[1:N]
+    H = hamiltonian(σ)
+    energy(H, maxdegree, solver; kws...)
+end
+bound, gram, ν = hamiltonian_energy(2, 2, solver, sparsity = NoSparsity())
+bound</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-0.8031077005710117</code></pre><p>We can see that the moment matrix uses all monomials:</p><pre><code class="language-julia hljs">ν.basis.monomials</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">7-element Vector{CondensedMatterSOS.SpinMonomial}:
+ 1
+ σᶻ₂
+ σʸ₂
+ σˣ₂
+ σᶻ₁
+ σʸ₁
+ σˣ₁</code></pre><p>Using term sparsity with block/cluster completion, we get the same bound:</p><pre><code class="language-julia hljs">bound, gram, ν = hamiltonian_energy(2, 2, solver)
+bound</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-0.8031077007260203</code></pre><p>But with a smaller basis:</p><pre><code class="language-julia hljs">[M.basis.monomials for M in ν.blocks]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">2-element Vector{Vector{CondensedMatterSOS.SpinMonomial}}:
+ [1, σᶻ₂, σᶻ₁]
+ [σʸ₂, σˣ₂, σʸ₁, σˣ₁]</code></pre><p>Using term sparsity with chordal completion, we get a smaller bound:</p><pre><code class="language-julia hljs">bound, gram, ν = hamiltonian_energy(2, 2, solver, sparsity = MonomialSparsity(ChordalCompletion()))
+bound</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-0.8705831380256306</code></pre><p>But with an even smaller basis:</p><pre><code class="language-julia hljs">[M.basis.monomials for M in ν.blocks]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">5-element Vector{Vector{CondensedMatterSOS.SpinMonomial}}:
+ [σʸ₁, σˣ₁]
+ [σˣ₂, σˣ₁]
+ [σʸ₂, σˣ₂]
+ [1, σᶻ₁]
+ [1, σᶻ₂]</code></pre><h2 id="D-2"><a class="docs-heading-anchor" href="#D-2">2D</a><a class="docs-heading-anchor-permalink" href="#D-2" title="Permalink"></a></h2><p>We now study the same model but on a square lattice.</p><pre><code class="language-julia hljs">@spin σ[1:2, 1:2]
+hamiltonian(σ)</code></pre><p class="math-container">\[ (-0.4 + 0.0im)σᶻ_{2,2} + (-0.4 + 0.0im)σᶻ_{1,2} + (-0.4 + 0.0im)σᶻ_{2,1} + (-0.4 + 0.0im)σᶻ_{1,1} + (0.5314767537831963 + 0.0im)σˣ_{1,2}σˣ_{2,2} + (2.456991333983293 + 0.0im)σˣ_{2,1}σˣ_{2,2} + (-0.806852326006714 - 0.0im)σˣ_{1,1}σˣ_{1,2} + (-0.07058313895389791 - 0.0im)σˣ_{1,1}σˣ_{2,1} \]</p><p>We can compute a lower bound <code>-4.15244</code> to the ground state energy as follow:</p><pre><code class="language-julia hljs">function hamiltonian_energy(N, M, maxdegree, solver; kws...)
+    @spin σ[1:N, 1:M]
+    H = hamiltonian(σ)
+    energy(H, maxdegree, solver; kws...)
+end
+bound, gram, ν = hamiltonian_energy(2, 2, 2, solver, sparsity = NoSparsity())
+bound</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-4.152440484668909</code></pre><p>We can see that the moment matrix uses all monomials:</p><pre><code class="language-julia hljs">ν.basis.monomials</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">13-element Vector{CondensedMatterSOS.SpinMonomial}:
+ 1
+ σᶻ₂₋₂
+ σʸ₂₋₂
+ σˣ₂₋₂
+ σᶻ₁₋₂
+ σʸ₁₋₂
+ σˣ₁₋₂
+ σᶻ₂₋₁
+ σʸ₂₋₁
+ σˣ₂₋₁
+ σᶻ₁₋₁
+ σʸ₁₋₁
+ σˣ₁₋₁</code></pre><p>Using term sparsity with block/cluster completion, we get the same bound:</p><pre><code class="language-julia hljs">bound, gram, ν = hamiltonian_energy(2, 2, 2, solver)
+bound</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-4.152440492472815</code></pre><p>But with a smaller basis:</p><pre><code class="language-julia hljs">[M.basis.monomials for M in ν.blocks]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">2-element Vector{Vector{CondensedMatterSOS.SpinMonomial}}:
+ [1, σᶻ₂₋₂, σᶻ₁₋₂, σᶻ₂₋₁, σᶻ₁₋₁]
+ [σʸ₂₋₂, σˣ₂₋₂, σʸ₁₋₂, σˣ₁₋₂, σʸ₂₋₁, σˣ₂₋₁, σʸ₁₋₁, σˣ₁₋₁]</code></pre><p>Using term sparsity with chordal completion, we get a smaller bound:</p><pre><code class="language-julia hljs">bound, gram, ν = hamiltonian_energy(2, 2, 2, solver, sparsity = MonomialSparsity(ChordalCompletion()))
+bound</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-5.465903547590753</code></pre><p>But with an even smaller basis:</p><pre><code class="language-julia hljs">[M.basis.monomials for M in ν.blocks]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">9-element Vector{Vector{CondensedMatterSOS.SpinMonomial}}:
+ [σˣ₁₋₂, σˣ₂₋₁, σˣ₁₋₁]
+ [1, σᶻ₂₋₁, σᶻ₁₋₁]
+ [σˣ₂₋₂, σˣ₁₋₂, σˣ₂₋₁]
+ [σʸ₁₋₁, σˣ₁₋₁]
+ [σʸ₂₋₁, σˣ₂₋₁]
+ [σʸ₁₋₂, σˣ₁₋₂]
+ [1, σᶻ₁₋₂]
+ [σʸ₂₋₂, σˣ₂₋₂]
+ [1, σᶻ₂₋₂]</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../Benchmark_1/">« Benchmark_1</a><a class="docs-footer-nextpage" href="../Ising/">Ising »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.25 on <span class="colophon-date" title="Tuesday 26 September 2023 12:29">Tuesday 26 September 2023</span>. Using Julia version 1.9.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
