@@ -19,11 +19,9 @@ jobs:
         run: |
           using Pkg
           Pkg.add([
-              PackageSpec(name="SumOfSquares", rev="bl/blockdiag2"),
               PackageSpec(path=pwd()),
           ])
           Pkg.instantiate()
-
       - name: Install dependencies
         run: julia --project=docs/ -e 'using Pkg; Pkg.instantiate();
                                        Pkg.develop(PackageSpec(path=pwd()))'
