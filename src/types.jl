@@ -29,6 +29,7 @@ end
 
 Base.copy(m::SpinMonomial) = SpinMonomial(copy(m.variables))
 MP.isconstant(mono::SpinMonomial) = iszero(length(mono.variables))
+Base.convert(::Type{SpinMonomial}, spin::SpinVariable) = MP.monomial(spin)
 MP.monomial(spin::SpinVariable) = SpinMonomial([spin])
 function MP.exponents(spin::SpinMonomial)
    #There must be a 1to1 corresponendence between variables and exponents
@@ -40,27 +41,27 @@ function MP.degree(spin::SpinMonomial, variable::SpinVariable)
     var = get(spin.variables, variable.id, nothing)
     return (var === nothing || var.index != variable.index) ? 0 : 1
 end
-function MP.powers(m::CondensedMatterSOS.SpinMonomial)
-    # TODO maybe use MappedArrays.jl here so that ẁe can hardcode the `eltype`
-    #      as `eltype(::Base.Generator)` is `Any`.
-    return Base.Generator(v -> (v, 1), variables(m))
+function MP.powers(m::SpinMonomial)
+    return MP.LazyMap{Tuple{SpinVariable,Int}}(Base.Fix2(tuple, 1), MP.variables(m))
 end
 
 MP.variables(spin::SpinMonomial) = collect(values(spin.variables))
 
-struct SpinTerm{T} <: MP.AbstractTerm{T}
-    coefficient::T
-    monomial::SpinMonomial
-end
+# Use default `MP.Term`
+MP.term_type(::Union{Type{M}}, ::Type{T}) where {M<:SpinMonomial,T} = MP.Term{T,M}
 
-function MP.term(coefficient, monomial::SpinMonomial)
-    return SpinTerm(coefficient, monomial)
-end
+# Use default `MP.Polynomial` with `Vector`
+MP.polynomial_type(::Type{MP.Term{C,M}}) where {C,M<:SpinMonomial} = MP.Polynomial{C,MP.Term{C,M},Vector{MP.Term{C, M}}}
+MP.polynomial_type(::Type{MP.Term{C,M} where C}) where {M<:SpinMonomial} = MP.Polynomial
 
-# TODO move to MP
-MP.convertconstant(::Type{SpinTerm{T}}, α) where {T} = convert(T, α) * MP.constantmonomial(SpinTerm{T})
-Base.copy(t::SpinTerm) = SpinTerm(MP.coefficient(t), copy(MP.monomial(t)))
-MA.mutable_copy(t::SpinTerm) = SpinTerm(MA.copy_if_mutable(MP.coefficient(t)), copy(MP.monomial(t)))
+function MP.variables(monos::AbstractVector{SpinMonomial})
+    vars = Set{SpinVariable}()
+    for mono in monos
+        union!(vars, MP.variables(mono))
+    end
+    return sort(collect(vars), rev=true)
+end
+MP.variables(p::MP.Polynomial{C,MP.Term{C,SpinMonomial}}) where {C} = MP.variables(MP.monomials(p))
 
 _spin_name(prefix::String, indices) = prefix * "[" * join(indices, ",") * "]"
 function spin_index(prefix::String, indices)
@@ -174,48 +175,10 @@ macro spin(args...)
     :($(foldl((x,y) -> :($x; $y), exprs, init=:())); $(Expr(:tuple, esc.(vars)...)))
 end
 
-
-struct SpinPolynomial{T} <: MP.AbstractPolynomial{T}
-    terms::Vector{SpinTerm{T}}
-end
-MP.terms(p::SpinPolynomial) = p.terms
-MP.zero(::Type{SpinPolynomial{T}}) where {T} = SpinPolynomial(SpinTerm{T}[])
-
-function MP.variables(monos::Vector{SpinMonomial})
-    vars = Set{SpinVariable}()
-    for mono in monos
-        union!(vars, variables(mono))
-    end
-    return sort(collect(vars), rev=true)
-end
-MP.variables(p::SpinPolynomial) = MP.variables(MP.monomials(p))
-
-# TODO move to MP
-function MP.polynomial(m::Union{SpinMonomial, SpinVariable}, T::Type)
-    return MP.polynomial(one(T) * m, T)
-end
-function MP.polynomial(t::SpinTerm{T}, ::Type{T}) where T
-    return SpinPolynomial([t])
-end
-function MP.polynomial(t::SpinTerm, T::Type)
-    return MP.polynomial(MP.changecoefficienttype(t, T), T)
-end
-function MP.polynomial(p::SpinPolynomial, T::Type)
-    return SpinPolynomial(MP.changecoefficienttype.(MP.terms(p), T))
-end
-
-const SpinLike = Union{SpinVariable, SpinMonomial, SpinTerm, SpinPolynomial}
+const SpinLike = Union{SpinVariable, SpinMonomial}
 MP.variable_union_type(::Union{SpinLike, Type{<:SpinLike}}) = SpinVariable
-MP.monomialtype(::Type{<:SpinLike}) = SpinMonomial
-function MP.constantmonomial(::Union{SpinLike, Type{<:SpinLike}})
+MP.monomial_type(::Type{<:SpinLike}) = SpinMonomial
+function MP.constant_monomial(::Union{SpinLike, Type{<:SpinLike}})
     return SpinMonomial(SpinVariable[])
 end
-MP.termtype(::Union{SpinLike, Type{<:SpinLike}}, T::Type) = SpinTerm{T}
-MP.polynomialtype(::Union{SpinLike, Type{<:SpinLike}}, T::Type) = SpinPolynomial{T}
-
-# #With this I solve 2*sx[1]<sx[1]
-# function SpinTerm{T}(spin::Union{SpinVariable, SpinMonomial}) where T
-#     return SpinTerm(one(T),monomial(spin))
-# end
-MP.polynomial(terms::Vector{SpinTerm{T}}, ::MP.SortedUniqState) where {T} = SpinPolynomial{T}(terms)
-MP.polynomial!(terms::Vector{SpinTerm{T}}, ::MP.SortedUniqState) where {T} = SpinPolynomial{T}(terms)
+MP.multiplication_preserves_monomial_order(::Type{SpinMonomial}) = false

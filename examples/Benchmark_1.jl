@@ -7,18 +7,14 @@
 
 using Test #src
 using CondensedMatterSOS
-import MultivariatePolynomials
-const MP = MultivariatePolynomials
+import MultivariatePolynomials as MP
 @spin σ[1:3]
 heisenberg_hamiltonian(σ, true)
 
 ## Let's pick a solver from [this list](https://jump.dev/JuMP.jl/dev/installation/#Getting-Solvers).
 
-using CSDP
-solver = optimizer_with_attributes(
-    () -> MOIU.CachingOptimizer(MOIU.UniversalFallback(MOIU.Model{Float64}()), CSDP.Optimizer()),
-    MOI.Silent() => false,
-);
+import Clarabel
+solver = Clarabel.Optimizer
 
 # We can compute a lower bound `-2√2` to the ground state energy as follow:
 
@@ -26,7 +22,7 @@ function hamiltonian_energy(N, maxdegree, solver; symmetry=true, consecutive=fal
     @spin σ[1:N]
     H = heisenberg_hamiltonian(σ, true)
     G = Lattice1Group(N)
-    cone = NonnegPolyInnerCone{SumOfSquares.COI.HermitianPositiveSemidefiniteConeTriangle}()
+    cone = NonnegPolyInnerCone{MOI.HermitianPositiveSemidefiniteConeTriangle}()
     @assert iseven(maxdegree)
     cert = SumOfSquares.Certificate.FixedBasis(
         cone,
@@ -74,10 +70,10 @@ bound
 # The reduction is obtained by block diagonalizing with a change of polynomial
 # basis to the isotypical basis.
 
-display([M.basis.polynomials for M in ν.sub_moment_matrices])
+display([M.basis.polynomials for M in ν.blocks])
 
-@test length(ν.sub_moment_matrices) == 7 #src
-[M.basis.polynomials for M in ν.sub_moment_matrices]
+@test length(ν.blocks) == 7 #src
+[M.basis.polynomials for M in ν.blocks]
 
 # Let's try this for 3 sites. First without symmetry.
 
@@ -102,7 +98,7 @@ bound, gram, ν = hamiltonian_energy(
 
 # Let's look at the isotypical basis.
 
-display([M.basis.polynomials for M in ν.sub_moment_matrices])
+display([M.basis.polynomials for M in ν.blocks])
 
 # Now let's define a function for our common use case.
 
@@ -118,7 +114,7 @@ function f(L, d=1, consecutive=false; symmetry=true)
         symmetry=symmetry,
     )
     @show bound
-    for M in ν.sub_moment_matrices
+    for M in ν.blocks
         display(round.(M.basis.polynomials, digits=6))
     end
     println("E/N = ", bound / L)

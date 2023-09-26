@@ -35,15 +35,14 @@ function MP.name_base_indices(var::SpinVariable) # Used to print variable
     end
 end
 
-include("sequences.jl")
-import .Sequences
-
 include("operators.jl")
 include("monom-set.jl")
 
 include("ising.jl")
 
 include("symmetry.jl")
+export Lattice1Group
+
 include("action.jl")
 include("sos.jl")
 

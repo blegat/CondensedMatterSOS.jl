@@ -1,8 +1,6 @@
-using MultivariatePolynomials
-const MP = MultivariatePolynomials
+import MultivariatePolynomials as MP
 using Test
 using CondensedMatterSOS
-
 const CMS = CondensedMatterSOS;
 
 @spin sigma[1:4];
@@ -15,13 +13,13 @@ D = 3*sigmax[1]*sigmax[2];
 
 @testset "show" begin
     @test sprint(show, A) == "(0 - 7im)sigmaˣ₂sigmaᶻ₃"
-    @test sprint(show, MIME"text/print"(), A) == "(0 - 7im)*sigmax[2]*sigmaz[3]"
+    @test sprint(show, MIME"text/print"(), A) == "(0 - 7im)*sigmaˣ[2]*sigmaᶻ[3]"
     @test sprint(show, B) == "sigmaˣ₁sigmaˣ₂"
-    @test sprint(show, MIME"text/print"(), B) == "sigmax[1]*sigmax[2]"
+    @test sprint(show, MIME"text/print"(), B) == "sigmaˣ[1]*sigmaˣ[2]"
     @test sprint(show, C) == "sigmaˣ₃sigmaʸ₄"
-    @test sprint(show, MIME"text/print"(), C) == "sigmax[3]*sigmay[4]"
+    @test sprint(show, MIME"text/print"(), C) == "sigmaˣ[3]*sigmaʸ[4]"
     @test sprint(show, D) == "(3 + 0im)sigmaˣ₁sigmaˣ₂"
-    @test sprint(show, MIME"text/print"(), D) == "(3 + 0im)*sigmax[1]*sigmax[2]"
+    @test sprint(show, MIME"text/print"(), D) == "(3 + 0im)*sigmaˣ[1]*sigmaˣ[2]"
 end
 
 # test that in addition to `x == y`, we
@@ -65,10 +63,10 @@ end
 
 
 @testset "unsorted" begin
-    @test sigmax[1]*sigmax[2] isa CMS.SpinTerm{Complex{Int}}
-    m = constantmonomial(sigmax[1])
-    @test m * m isa CMS.SpinTerm{Complex{Int}}
-    @test collect(variables((sigmax[1]*sigmax[2]))) == [sigmax[1], sigmax[2]]
+    @test sigmax[1]*sigmax[2] isa MP.Term{Complex{Int}}
+    m = MP.constant_monomial(sigmax[1])
+    @test m * m isa MP.Term{Complex{Int}}
+    @test collect(MP.variables((sigmax[1]*sigmax[2]))) == [sigmax[1], sigmax[2]]
 end
 
 @testset "monomials and terms" begin
@@ -106,7 +104,7 @@ end
     end
     test_equal(-sigmax[1] * sigmax[2] - sigmax[2] * sigmax[1], -2sigmax[1] * sigmax[2])
     test_equal(sum(sigmaz), sigmaz[1] + sigmaz[2] + sigmaz[3] + sigmaz[4])
-    @test variables(sum(sigmaz)) == sigmaz
+    @test MP.variables(sum(sigmaz)) == sigmaz
     test_equal(sigmax[1] + 1 - sigmax[1], 1)
     test_equal(sigmax[1] + sigmax[2] - sigmax[3], sigmax[1] - sigmax[3] + sigmax[2])
     test_equal(sigmax[1] - sigmax[2] + sigmax[3], sigmax[1] + sigmax[3] - sigmax[2])
@@ -139,20 +137,27 @@ end
 end
 
 using LinearAlgebra
+
+function _test_matvec(v, M, exp)
+    @test v' * M * v == exp
+    Mv = M * v
+    @test v' * Mv == exp
+    vM = v' * M
+    @test vM * v == exp
+    vv = v * v'
+    @test vv isa Matrix{MP.Term{Complex{Int},CMS.SpinMonomial}}
+    @test dot(vv, M) == exp
+    @test sum(vv .* M) == exp
+end
+
 @testset "matvec with $v" for v in (sigmax[1:2], [1, sigmax[1]], [sigmax[1], sigmay[1]])
     exp = v[1]*v[2] + v[2]*v[1] + v[1]^2 + v[2]^2
-    @test v' * ones(2, 2) * v == exp
-    @test v' * ones(Int, 2, 2) * v == exp
-    vv = v * v'
-    @test vv isa Matrix{CMS.SpinTerm{Complex{Int}}}
-    @test dot(vv, ones(2, 2)) == exp
-    @test dot(vv, ones(Int, 2, 2)) == exp
-    @test sum(vv .* ones(2, 2)) == exp
-    @test sum(vv .* ones(Int, 2, 2)) == exp
+    _test_matvec(v, ones(2, 2), exp)
+    _test_matvec(v, ones(Int, 2, 2), exp)
 end
 
 @testset "monomials" begin
-    @test monovec([1, sigmax[1], sigmax[2]]) == [sigmax[1], sigmax[2], 1]
+    @test MP.monomial_vector([1, sigmax[1], sigmax[2]]) == [1, sigmax[2], sigmax[1]]
     @test CMS.monomials([sigmax[1], sigmax[2]], 0) == [1]
     for consecutive in [false, true]
         @test MP.monomials([sigmax[1], sigmax[2]], 0, consecutive=consecutive) == [1]

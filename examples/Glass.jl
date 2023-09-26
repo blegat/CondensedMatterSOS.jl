@@ -19,11 +19,8 @@ hamiltonian(σ)
 
 # Let's pick a solver from [this list](https://jump.dev/JuMP.jl/dev/installation/#Getting-Solvers).
 
-using CSDP
-solver = optimizer_with_attributes(
-    () -> MOIU.CachingOptimizer(MOIU.UniversalFallback(MOIU.Model{Float64}()), CSDP.Optimizer()),
-    MOI.Silent() => true
-)
+import Clarabel
+solver = Clarabel.Optimizer
 
 # We can compute a lower bound `-0.8031` to the ground state energy as follow:
 
@@ -49,8 +46,8 @@ bound
 
 # But with a smaller basis:
 
-@test length(ν.sub_moment_matrices) == 2 #src
-[M.basis.monomials for M in ν.sub_moment_matrices]
+@test length(ν.blocks) == 2 #src
+[M.basis.monomials for M in ν.blocks]
 
 # Using term sparsity with chordal completion, we get a smaller bound:
 
@@ -60,8 +57,8 @@ bound
 
 # But with an even smaller basis:
 
-@test length(ν.sub_moment_matrices) == 5 #src
-[M.basis.monomials for M in ν.sub_moment_matrices]
+@test length(ν.blocks) == 5 #src
+[M.basis.monomials for M in ν.blocks]
 
 # ## 2D
 
@@ -94,16 +91,16 @@ bound
 
 # But with a smaller basis:
 
-@test length(ν.sub_moment_matrices) == 2 #src
-[M.basis.monomials for M in ν.sub_moment_matrices]
+@test length(ν.blocks) == 2 #src
+[M.basis.monomials for M in ν.blocks]
 
 # Using term sparsity with chordal completion, we get a smaller bound:
 
 bound, gram, ν = hamiltonian_energy(2, 2, 2, solver, sparsity = MonomialSparsity(ChordalCompletion()))
-@test bound ≈ -5.1878 rtol=1e-3 #src
+@test bound ≈ -5.4659 rtol=1e-3 #src
 bound
 
 # But with an even smaller basis:
 
-@test length(ν.sub_moment_matrices) == 9 #src
-[M.basis.monomials for M in ν.sub_moment_matrices]
+@test length(ν.blocks) == 9 #src
+[M.basis.monomials for M in ν.blocks]
