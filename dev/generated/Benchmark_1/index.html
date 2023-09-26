@@ -1,21 +1,17 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Benchmark_1 · CondensedMatterSOS</title><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.045/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.24/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">CondensedMatterSOS</a></span></div><form class="docs-search" action="../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../">Introduction</a></li><li><span class="tocitem">Examples</span><ul><li class="is-active"><a class="tocitem" href>Benchmark_1</a><ul class="internal"><li class="toplevel"><a class="tocitem" href="#Symmetry-reduction"><span>Symmetry reduction</span></a></li></ul></li><li><a class="tocitem" href="../Glass/">Glass</a></li><li><a class="tocitem" href="../Ising/">Ising</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li class="is-active"><a href>Benchmark_1</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Benchmark_1</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/blegat/CondensedMatterSOS.jl/blob/master/examples/Benchmark_1.jl" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Benchmark-1"><a class="docs-heading-anchor" href="#Benchmark-1">Benchmark 1</a><a id="Benchmark-1-1"></a><a class="docs-heading-anchor-permalink" href="#Benchmark-1" title="Permalink"></a></h1><p><a href="https://mybinder.org/v2/gh/blegat/CondensedMatterSOS.jl/gh-pages?filepath=dev/generated/Benchmark_1.ipynb"><img src="https://mybinder.org/badge_logo.svg" alt/></a> <a href="https://nbviewer.jupyter.org/github/blegat/CondensedMatterSOS.jl/blob/gh-pages/dev/generated/Benchmark_1.ipynb"><img src="https://img.shields.io/badge/show-nbviewer-579ACA.svg" alt/></a></p><p>We study the Hamiltonian of the Heisenberg model with periodic boundary conditions.</p><pre><code class="language-julia hljs">using CondensedMatterSOS
-import MultivariatePolynomials
-const MP = MultivariatePolynomials
+import MultivariatePolynomials as MP
 @spin σ[1:3]
 heisenberg_hamiltonian(σ, true)
 
 # Let&#39;s pick a solver from [this list](https://jump.dev/JuMP.jl/dev/installation/#Getting-Solvers).
 
-using CSDP
-solver = optimizer_with_attributes(
-    () -&gt; MOIU.CachingOptimizer(MOIU.UniversalFallback(MOIU.Model{Float64}()), CSDP.Optimizer()),
-    MOI.Silent() =&gt; false,
-);</code></pre><p>We can compute a lower bound <code>-2√2</code> to the ground state energy as follow:</p><pre><code class="language-julia hljs">function hamiltonian_energy(N, maxdegree, solver; symmetry=true, consecutive=false, kws...)
+import Clarabel
+solver = Clarabel.Optimizer</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Clarabel.MOIwrapper.Optimizer</code></pre><p>We can compute a lower bound <code>-2√2</code> to the ground state energy as follow:</p><pre><code class="language-julia hljs">function hamiltonian_energy(N, maxdegree, solver; symmetry=true, consecutive=false, kws...)
     @spin σ[1:N]
     H = heisenberg_hamiltonian(σ, true)
     G = Lattice1Group(N)
-    cone = NonnegPolyInnerCone{SumOfSquares.COI.HermitianPositiveSemidefiniteConeTriangle}()
+    cone = NonnegPolyInnerCone{MOI.HermitianPositiveSemidefiniteConeTriangle}()
     @assert iseven(maxdegree)
     cert = SumOfSquares.Certificate.FixedBasis(
         cone,
@@ -38,41 +34,41 @@ bound, gram, ν = hamiltonian_energy(
     symmetry = false,
     sparsity = SumOfSquares.Sparsity.NoPattern(),
 )
-bound</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-6.000000022862929</code></pre><p>We can see that the moment matrix uses all monomials:</p><pre><code class="language-julia hljs">ν.basis.monomials</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">7-element Vector{CondensedMatterSOS.SpinMonomial}:
+bound</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-5.999999993853577</code></pre><p>We can see that the moment matrix uses all monomials:</p><pre><code class="language-julia hljs">ν.basis.monomials</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">7-element Vector{CondensedMatterSOS.SpinMonomial}:
  1
- σˣ₁
- σʸ₁
- σᶻ₁
- σˣ₂
+ σᶻ₂
  σʸ₂
- σᶻ₂</code></pre><h1 id="Symmetry-reduction"><a class="docs-heading-anchor" href="#Symmetry-reduction">Symmetry reduction</a><a id="Symmetry-reduction-1"></a><a class="docs-heading-anchor-permalink" href="#Symmetry-reduction" title="Permalink"></a></h1><p>We can reduce the computation using symmetry reduction as follows.</p><pre><code class="language-julia hljs">using CondensedMatterSOS
+ σˣ₂
+ σᶻ₁
+ σʸ₁
+ σˣ₁</code></pre><h1 id="Symmetry-reduction"><a class="docs-heading-anchor" href="#Symmetry-reduction">Symmetry reduction</a><a id="Symmetry-reduction-1"></a><a class="docs-heading-anchor-permalink" href="#Symmetry-reduction" title="Permalink"></a></h1><p>We can reduce the computation using symmetry reduction as follows.</p><pre><code class="language-julia hljs">using CondensedMatterSOS
 
 bound, gram, ν = hamiltonian_energy(
     2,
     2,
     solver,
 )
-bound</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-6.000000006574734</code></pre><p>The reduction is obtained by block diagonalizing with a change of polynomial basis to the isotypical basis.</p><pre><code class="language-julia hljs">display([M.basis.polynomials for M in ν.sub_moment_matrices])
+bound</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-5.99999999705793</code></pre><p>The reduction is obtained by block diagonalizing with a change of polynomial basis to the isotypical basis.</p><pre><code class="language-julia hljs">display([M.basis.polynomials for M in ν.blocks])
 
-[M.basis.polynomials for M in ν.sub_moment_matrices]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">7-element Vector{Vector{CondensedMatterSOS.SpinPolynomial{ComplexF64}}}:
- [(-0.7071067811865472 + 0.0im)σˣ₁ + (-0.7071067811865475 + 0.0im)σˣ₂]
- [(-0.7071067811865472 + 0.0im)σʸ₁ + (-0.7071067811865475 + 0.0im)σʸ₂]
- [(-0.7071067811865472 + 0.0im)σᶻ₁ + (-0.7071067811865475 + 0.0im)σᶻ₂]
- [(-0.7071067811865472 + 0.0im)σˣ₁ + (0.7071067811865475 + 0.0im)σˣ₂]
- [(-0.7071067811865472 + 0.0im)σʸ₁ + (0.7071067811865475 + 0.0im)σʸ₂]
- [(-0.7071067811865472 + 0.0im)σᶻ₁ + (0.7071067811865475 + 0.0im)σᶻ₂]
- [(1.0 - 0.0im)]</code></pre><p>Let&#39;s try this for 3 sites. First without symmetry.</p><pre><code class="language-julia hljs">bound, gram, ν = hamiltonian_energy(
+[M.basis.polynomials for M in ν.blocks]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">7-element Vector{Vector{MultivariatePolynomials.VectorPolynomial{ComplexF64, MultivariatePolynomials.Term{ComplexF64, CondensedMatterSOS.SpinMonomial}}}}:
+ [(-0.7071067811865472 + 0.0im)σᶻ₂ + (-0.7071067811865475 + 0.0im)σᶻ₁]
+ [(-0.7071067811865472 + 0.0im)σʸ₂ + (-0.7071067811865475 + 0.0im)σʸ₁]
+ [(-0.7071067811865472 + 0.0im)σˣ₂ + (-0.7071067811865475 + 0.0im)σˣ₁]
+ [(1.0 - 0.0im)]
+ [(-0.7071067811865472 + 0.0im)σᶻ₂ + (0.7071067811865475 + 0.0im)σᶻ₁]
+ [(-0.7071067811865472 + 0.0im)σʸ₂ + (0.7071067811865475 + 0.0im)σʸ₁]
+ [(-0.7071067811865472 + 0.0im)σˣ₂ + (0.7071067811865475 + 0.0im)σˣ₁]</code></pre><p>Let&#39;s try this for 3 sites. First without symmetry.</p><pre><code class="language-julia hljs">bound, gram, ν = hamiltonian_energy(
     3,
     2,
     solver,
     symmetry = false,
 )
-@show bound</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-4.500000019875445</code></pre><p>Now with symmetry.</p><pre><code class="language-julia hljs">bound, gram, ν = hamiltonian_energy(
+@show bound</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-4.499999996479381</code></pre><p>Now with symmetry.</p><pre><code class="language-julia hljs">bound, gram, ν = hamiltonian_energy(
     3,
     2,
     solver,
 )
-@show bound</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-4.500000023057006</code></pre><p>Let&#39;s look at the isotypical basis.</p><pre><code class="language-julia hljs">display([M.basis.polynomials for M in ν.sub_moment_matrices])</code></pre><p>Now let&#39;s define a function for our common use case.</p><pre><code class="language-julia hljs">function f(L, d=1, consecutive=false; symmetry=true)
+@show bound</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-4.499999996767558</code></pre><p>Let&#39;s look at the isotypical basis.</p><pre><code class="language-julia hljs">display([M.basis.polynomials for M in ν.blocks])</code></pre><p>Now let&#39;s define a function for our common use case.</p><pre><code class="language-julia hljs">function f(L, d=1, consecutive=false; symmetry=true)
     @show L
     println(&quot;***&quot;)
     @show d
@@ -84,7 +80,7 @@ bound</code></pre><pre class="documenter-example-output"><code class="nohighligh
         symmetry=symmetry,
     )
     @show bound
-    for M in ν.sub_moment_matrices
+    for M in ν.blocks
         display(round.(M.basis.polynomials, digits=6))
     end
     println(&quot;E/N = &quot;, bound / L)
@@ -94,59 +90,94 @@ end
 f(6, 1, true)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">L = 6
 ***
 d = 1
-Iter: 10 Ap: 9.70e-01 Pobj: -4.5000000e+00 Ad: 9.70e-01 Dobj: -4.5000000e+00
-Success: SDP solved
-Primal objective value: -4.5000000e+00
-Dual objective value: -4.5000000e+00
-Relative primal infeasibility: 5.49e-16
-Relative dual infeasibility: 2.47e-09
-Real Relative Gap: 2.08e-09
-XZ Relative Gap: 5.08e-09
-DIMACS error measures: 1.10e-15 0.00e+00 6.67e-09 0.00e+00 2.08e-09 5.08e-09
-CSDP 6.2.0
-Iter:  0 Ap: 0.00e+00 Pobj:  0.0000000e+00 Ad: 0.00e+00 Dobj:  0.0000000e+00
-Iter:  1 Ap: 9.56e-01 Pobj: -2.2102178e+01 Ad: 5.98e-01 Dobj: -7.0084924e+00
-Iter:  2 Ap: 1.00e+00 Pobj: -3.3490766e+01 Ad: 9.50e-01 Dobj: -7.3463752e+00
-Iter:  3 Ap: 1.00e+00 Pobj: -2.2209224e+01 Ad: 9.06e-01 Dobj: -1.2143640e+01
-Iter:  4 Ap: 1.00e+00 Pobj: -1.9349852e+01 Ad: 7.85e-01 Dobj: -1.5786113e+01
-Iter:  5 Ap: 1.00e+00 Pobj: -1.8132059e+01 Ad: 8.85e-01 Dobj: -1.7541366e+01
-Iter:  6 Ap: 1.00e+00 Pobj: -1.8008840e+01 Ad: 9.33e-01 Dobj: -1.7949970e+01
-Iter:  7 Ap: 1.00e+00 Pobj: -1.8000695e+01 Ad: 9.51e-01 Dobj: -1.7995883e+01
-Iter:  8 Ap: 1.00e+00 Pobj: -1.8000060e+01 Ad: 9.91e-01 Dobj: -1.7999823e+01
-Iter:  9 Ap: 1.00e+00 Pobj: -1.8000004e+01 Ad: 1.00e+00 Dobj: -1.7999994e+01
-Iter: 10 Ap: 1.00e+00 Pobj: -1.8000000e+01 Ad: 9.75e-01 Dobj: -1.7999999e+01
-  0.099937 seconds (361.50 k allocations: 29.200 MiB, 21.27% compilation time)
-bound = -18.000000007573597
-E/N = -3.0000000012622663
+-------------------------------------------------------------
+           Clarabel.jl v0.6.0  -  Clever Acronym
+                   (c) Paul Goulart
+                University of Oxford, 2022
+-------------------------------------------------------------
+
+problem:
+  variables     = 8
+  constraints   = 67
+  nnz(P)        = 0
+  nnz(A)        = 292
+  cones (total) = 8
+    : Zero        = 1,  numel = 46
+    : PSDTriangle = 7,  numel = (3,3,3,3,...,3)
+
+settings:
+  linear algebra: direct / qdldl, precision: Float64
+  max iter = 200, time limit = Inf,  max step = 0.990
+  tol_feas = 1.0e-08, tol_gap_abs = 1.0e-08, tol_gap_rel = 1.0e-08,
+  static reg : on, ϵ1 = 1.0e-08, ϵ2 = 4.9e-32
+  dynamic reg: on, ϵ = 1.0e-13, δ = 2.0e-07
+  iter refine: on, reltol = 1.0e-13, abstol = 1.0e-12,
+               max iter = 10, stop ratio = 5.0
+  equilibrate: on, min_scale = 1.0e-04, max_scale = 1.0e+04
+               max iter = 10
+
+iter    pcost        dcost       gap       pres      dres      k/t        μ       step
+---------------------------------------------------------------------------------------------
+  0  -2.3418e-12   2.0510e-15  2.34e-12  5.06e-01  3.42e-01  1.00e+00  3.40e+00   ------
+  1   9.1182e+00   9.3357e+00  2.39e-02  1.68e-01  9.35e-02  5.30e-01  1.24e+00  7.44e-01
+  2   1.7367e+01   1.7455e+01  5.06e-03  1.95e-02  9.61e-03  1.33e-01  1.83e-01  9.90e-01
+  3   1.7994e+01   1.7995e+01  5.37e-05  2.03e-04  9.88e-05  1.45e-03  1.96e-03  9.89e-01
+  4   1.8000e+01   1.8000e+01  5.37e-07  2.02e-06  9.87e-07  1.45e-05  1.96e-05  9.90e-01
+  5   1.8000e+01   1.8000e+01  5.37e-09  2.02e-08  9.87e-09  1.45e-07  1.96e-07  9.90e-01
+  6   1.8000e+01   1.8000e+01  5.37e-11  2.02e-10  9.87e-11  1.45e-09  1.96e-09  9.90e-01
+---------------------------------------------------------------------------------------------
+Terminated with status = solved
+solve time = 2.19ms
+  0.089261 seconds (300.30 k allocations: 26.398 MiB)
+bound = -17.999999993565496
+E/N = -2.9999999989275827
 ------------------------------------</code></pre><p>Now with <code>d = 2</code>.</p><pre><code class="language-julia hljs">f(6, 2, true)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">L = 6
 ***
 d = 2
-Iter: 11 Ap: 9.59e-01 Pobj: -1.8000000e+01 Ad: 9.59e-01 Dobj: -1.8000000e+01
-Success: SDP solved
-Primal objective value: -1.8000000e+01
-Dual objective value: -1.8000000e+01
-Relative primal infeasibility: 6.04e-15
-Relative dual infeasibility: 6.50e-10
-Real Relative Gap: 7.64e-10
-XZ Relative Gap: 1.16e-09
-DIMACS error measures: 1.58e-14 0.00e+00 2.22e-09 0.00e+00 7.64e-10 1.16e-09
-CSDP 6.2.0
-Iter:  0 Ap: 0.00e+00 Pobj:  0.0000000e+00 Ad: 0.00e+00 Dobj:  0.0000000e+00
-Iter:  1 Ap: 8.49e-01 Pobj: -2.5529703e+01 Ad: 5.17e-01 Dobj: -7.8034414e+00
-Iter:  2 Ap: 1.00e+00 Pobj: -2.2424814e+02 Ad: 7.81e-01 Dobj:  1.1152854e+00
-Iter:  3 Ap: 1.00e+00 Pobj: -2.0483924e+02 Ad: 7.58e-01 Dobj: -2.4950881e+00
-Iter:  4 Ap: 1.00e+00 Pobj: -7.0145980e+01 Ad: 8.78e-01 Dobj: -2.7318044e+00
-Iter:  5 Ap: 1.00e+00 Pobj: -2.8082270e+01 Ad: 8.25e-01 Dobj: -5.3450726e+00
-Iter:  6 Ap: 1.00e+00 Pobj: -1.9399916e+01 Ad: 8.74e-01 Dobj: -9.6128294e+00
-Iter:  7 Ap: 8.31e-01 Pobj: -1.5297154e+01 Ad: 7.80e-01 Dobj: -9.9211876e+00
-Iter:  8 Ap: 1.00e+00 Pobj: -1.3293035e+01 Ad: 6.71e-01 Dobj: -1.0812164e+01
-Iter:  9 Ap: 1.00e+00 Pobj: -1.2423162e+01 Ad: 7.71e-01 Dobj: -1.1525773e+01
-Iter: 10 Ap: 1.00e+00 Pobj: -1.2083296e+01 Ad: 8.62e-01 Dobj: -1.1879161e+01
-Iter: 11 Ap: 1.00e+00 Pobj: -1.2009190e+01 Ad: 9.83e-01 Dobj: -1.1989887e+01
-Iter: 12 Ap: 1.00e+00 Pobj: -1.2000492e+01 Ad: 9.94e-01 Dobj: -1.1999484e+01
-Iter: 13 Ap: 9.82e-01 Pobj: -1.2000041e+01 Ad: 1.00e+00 Dobj: -1.1999974e+01
-Iter: 14 Ap: 9.99e-01 Pobj: -1.2000002e+01 Ad: 1.00e+00 Dobj: -1.1999999e+01
-  1.408546 seconds (3.11 M allocations: 357.188 MiB, 10.40% gc time)
-bound = -12.000000068582459
-E/N = -2.00000001143041
-------------------------------------</code></pre><table><tr><th style="text-align: right">id</th><th style="text-align: right">irep 1</th><th style="text-align: right">irep 2</th><th style="text-align: right">irep 3</th><th style="text-align: right">irep 4</th></tr><tr><td style="text-align: right">degree</td><td style="text-align: right">2</td><td style="text-align: right">3</td><td style="text-align: right">1</td><td style="text-align: right">3</td></tr><tr><td style="text-align: right">mult 2</td><td style="text-align: right">1</td><td style="text-align: right">3</td><td style="text-align: right">2</td><td style="text-align: right">1</td></tr><tr><td style="text-align: right">mult 3</td><td style="text-align: right">3</td><td style="text-align: right">6</td><td style="text-align: right">4</td><td style="text-align: right">3</td></tr><tr><td style="text-align: right">mult 4</td><td style="text-align: right">6</td><td style="text-align: right">10</td><td style="text-align: right">7</td><td style="text-align: right">6</td></tr><tr><td style="text-align: right">mult 5</td><td style="text-align: right">10</td><td style="text-align: right">15</td><td style="text-align: right">11</td><td style="text-align: right">10</td></tr><tr><td style="text-align: right">mult 6</td><td style="text-align: right">15</td><td style="text-align: right">21</td><td style="text-align: right">16</td><td style="text-align: right">15</td></tr><tr><td style="text-align: right">mult 7</td><td style="text-align: right">21</td><td style="text-align: right">28</td><td style="text-align: right">22</td><td style="text-align: right">21</td></tr></table><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../">« Introduction</a><a class="docs-footer-nextpage" href="../Glass/">Glass »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.24 on <span class="colophon-date" title="Tuesday 9 May 2023 16:16">Tuesday 9 May 2023</span>. Using Julia version 1.9.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+-------------------------------------------------------------
+           Clarabel.jl v0.6.0  -  Clever Acronym
+                   (c) Paul Goulart
+                University of Oxford, 2022
+-------------------------------------------------------------
+
+problem:
+  variables     = 46
+  constraints   = 895
+  nnz(P)        = 0
+  nnz(A)        = 10048
+  cones (total) = 25
+    : Zero        = 1,  numel = 774
+    : PSDTriangle = 24,  numel = (3,10,10,3,...,3)
+
+settings:
+  linear algebra: direct / qdldl, precision: Float64
+  max iter = 200, time limit = Inf,  max step = 0.990
+  tol_feas = 1.0e-08, tol_gap_abs = 1.0e-08, tol_gap_rel = 1.0e-08,
+  static reg : on, ϵ1 = 1.0e-08, ϵ2 = 4.9e-32
+  dynamic reg: on, ϵ = 1.0e-13, δ = 2.0e-07
+  iter refine: on, reltol = 1.0e-13, abstol = 1.0e-12,
+               max iter = 10, stop ratio = 5.0
+  equilibrate: on, min_scale = 1.0e-04, max_scale = 1.0e+04
+               max iter = 10
+
+iter    pcost        dcost       gap       pres      dres      k/t        μ       step
+---------------------------------------------------------------------------------------------
+  0   1.4276e+00   1.4276e+00  0.00e+00  7.33e-01  5.97e-01  1.00e+00  2.30e+00   ------
+  1   5.3281e+00   5.3827e+00  1.02e-02  3.09e-01  1.64e-01  2.90e-01  7.52e-01  7.09e-01
+  2   1.0806e+01   1.0861e+01  5.08e-03  1.16e-01  6.06e-02  1.67e-01  3.67e-01  6.85e-01
+  3   9.6289e+00   9.6819e+00  5.50e-03  4.87e-02  4.24e-02  1.42e-01  2.89e-01  5.18e-01
+  4   1.1534e+01   1.1544e+01  8.23e-04  6.68e-03  5.87e-03  2.37e-02  4.69e-02  8.52e-01
+  5   1.1943e+01   1.1945e+01  1.84e-04  1.71e-03  1.43e-03  5.76e-03  1.18e-02  8.95e-01
+  6   1.1999e+01   1.1999e+01  2.92e-06  2.72e-05  2.29e-05  9.26e-05  1.91e-04  9.84e-01
+  7   1.2000e+01   1.2000e+01  1.34e-07  1.25e-06  1.05e-06  4.24e-06  8.76e-06  9.55e-01
+  8   1.2000e+01   1.2000e+01  3.89e-09  3.65e-08  3.06e-08  1.24e-07  2.56e-07  9.73e-01
+  9   1.2000e+01   1.2000e+01  3.89e-09  3.65e-08  3.06e-08  1.24e-07  2.56e-07  0.00e+00
+---------------------------------------------------------------------------------------------
+Terminated with status = solved (reduced accuracy)
+solve time = 35.9ms
+┌ Warning: Termination status: ALMOST_OPTIMAL, ALMOST_SOLVED
+└ @ CondensedMatterSOS ~/work/CondensedMatterSOS.jl/CondensedMatterSOS.jl/src/sos.jl:39
+  0.607815 seconds (1.58 M allocations: 196.533 MiB, 12.09% gc time)
+bound = -11.999999696956051
+E/N = -1.9999999494926752
+------------------------------------</code></pre><table><tr><th style="text-align: right">id</th><th style="text-align: right">irep 1</th><th style="text-align: right">irep 2</th><th style="text-align: right">irep 3</th><th style="text-align: right">irep 4</th></tr><tr><td style="text-align: right">degree</td><td style="text-align: right">2</td><td style="text-align: right">3</td><td style="text-align: right">1</td><td style="text-align: right">3</td></tr><tr><td style="text-align: right">mult 2</td><td style="text-align: right">1</td><td style="text-align: right">3</td><td style="text-align: right">2</td><td style="text-align: right">1</td></tr><tr><td style="text-align: right">mult 3</td><td style="text-align: right">3</td><td style="text-align: right">6</td><td style="text-align: right">4</td><td style="text-align: right">3</td></tr><tr><td style="text-align: right">mult 4</td><td style="text-align: right">6</td><td style="text-align: right">10</td><td style="text-align: right">7</td><td style="text-align: right">6</td></tr><tr><td style="text-align: right">mult 5</td><td style="text-align: right">10</td><td style="text-align: right">15</td><td style="text-align: right">11</td><td style="text-align: right">10</td></tr><tr><td style="text-align: right">mult 6</td><td style="text-align: right">15</td><td style="text-align: right">21</td><td style="text-align: right">16</td><td style="text-align: right">15</td></tr><tr><td style="text-align: right">mult 7</td><td style="text-align: right">21</td><td style="text-align: right">28</td><td style="text-align: right">22</td><td style="text-align: right">21</td></tr></table><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../">« Introduction</a><a class="docs-footer-nextpage" href="../Glass/">Glass »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.25 on <span class="colophon-date" title="Tuesday 26 September 2023 12:42">Tuesday 26 September 2023</span>. Using Julia version 1.9.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
