@@ -2,30 +2,25 @@
 <html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Benchmark_1 · CondensedMatterSOS</title><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.045/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.24/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">CondensedMatterSOS</a></span></div><form class="docs-search" action="../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../">Introduction</a></li><li><span class="tocitem">Examples</span><ul><li class="is-active"><a class="tocitem" href>Benchmark_1</a><ul class="internal"><li class="toplevel"><a class="tocitem" href="#Symmetry-reduction"><span>Symmetry reduction</span></a></li></ul></li><li><a class="tocitem" href="../Glass/">Glass</a></li><li><a class="tocitem" href="../Ising/">Ising</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li class="is-active"><a href>Benchmark_1</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Benchmark_1</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/blegat/CondensedMatterSOS.jl/blob/master/examples/Benchmark_1.jl" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Benchmark-1"><a class="docs-heading-anchor" href="#Benchmark-1">Benchmark 1</a><a id="Benchmark-1-1"></a><a class="docs-heading-anchor-permalink" href="#Benchmark-1" title="Permalink"></a></h1><p><a href="https://mybinder.org/v2/gh/blegat/CondensedMatterSOS.jl/gh-pages?filepath=dev/generated/Benchmark_1.ipynb"><img src="https://mybinder.org/badge_logo.svg" alt/></a> <a href="https://nbviewer.jupyter.org/github/blegat/CondensedMatterSOS.jl/blob/gh-pages/dev/generated/Benchmark_1.ipynb"><img src="https://img.shields.io/badge/show-nbviewer-579ACA.svg" alt/></a></p><p>We study the Hamiltonian of the Heisenberg model with periodic boundary conditions.</p><pre><code class="language-julia hljs">using CondensedMatterSOS
 import MultivariatePolynomials as MP
 @spin σ[1:3]
-heisenberg_hamiltonian(σ, true)
-
-# Let&#39;s pick a solver from [this list](https://jump.dev/JuMP.jl/dev/installation/#Getting-Solvers).
-
-import Clarabel
+MP.monomials(σ[1], 0:2, consecutive=true)
+heisenberg_hamiltonian(σ, true)</code></pre><p class="math-container">\[ σᶻ_{2}σᶻ_{3} + σʸ_{2}σʸ_{3} + σˣ_{2}σˣ_{3} + σᶻ_{1}σᶻ_{3} + σᶻ_{1}σᶻ_{2} + σʸ_{1}σʸ_{3} + σʸ_{1}σʸ_{2} + σˣ_{1}σˣ_{3} + σˣ_{1}σˣ_{2} \]</p><p>Let&#39;s pick a solver from <a href="https://jump.dev/JuMP.jl/dev/installation/#Getting-Solvers">this list</a>.</p><pre><code class="language-julia hljs">import Clarabel
 solver = Clarabel.Optimizer</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Clarabel.MOIwrapper.Optimizer</code></pre><p>We can compute a lower bound <code>-2√2</code> to the ground state energy as follow:</p><pre><code class="language-julia hljs">function hamiltonian_energy(N, maxdegree, solver; symmetry=true, consecutive=false, kws...)
     @spin σ[1:N]
-    H = heisenberg_hamiltonian(σ, true)
     G = Lattice1Group(N)
-    cone = NonnegPolyInnerCone{MOI.HermitianPositiveSemidefiniteConeTriangle}()
     @assert iseven(maxdegree)
-    cert = SumOfSquares.Certificate.FixedBasis(
+    H = heisenberg_hamiltonian(σ, true)
+    cone = NonnegPolyInnerCone{MOI.HermitianPositiveSemidefiniteConeTriangle}()
+    certificate = SumOfSquares.Certificate.FixedBasis(
         cone,
         MonomialBasis(MP.monomials(σ[1], 0:div(maxdegree, 2), consecutive=consecutive)),
     )
-    certificate = Symmetry.Ideal(
-        Symmetry.Pattern(G, Action(σ)),
-        cert,
-    )
     if symmetry
-        energy(H, maxdegree, solver; certificate = certificate, kws...)
-    else
-        energy(H, maxdegree, solver; kws...)
+        certificate = Symmetry.Ideal(
+            Symmetry.Pattern(G, Action(σ)),
+            certificate,
+        )
     end
+    energy(H, maxdegree, solver; certificate, kws...)
 end
 bound, gram, ν = hamiltonian_energy(
     2,
@@ -48,9 +43,7 @@ bound, gram, ν = hamiltonian_energy(
     2,
     solver,
 )
-bound</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-5.99999999705793</code></pre><p>The reduction is obtained by block diagonalizing with a change of polynomial basis to the isotypical basis.</p><pre><code class="language-julia hljs">display([M.basis.polynomials for M in ν.blocks])
-
-[M.basis.polynomials for M in ν.blocks]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">7-element Vector{Vector{MultivariatePolynomials.VectorPolynomial{ComplexF64, MultivariatePolynomials.Term{ComplexF64, CondensedMatterSOS.SpinMonomial}}}}:
+bound</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-5.99999999705793</code></pre><p>The reduction is obtained by block diagonalizing with a change of polynomial basis to the isotypical basis.</p><pre><code class="language-julia hljs">[M.basis.polynomials for M in ν.blocks]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">7-element Vector{Vector{MultivariatePolynomials.VectorPolynomial{ComplexF64, MultivariatePolynomials.Term{ComplexF64, CondensedMatterSOS.SpinMonomial}}}}:
  [(-0.7071067811865472 + 0.0im)σᶻ₂ + (-0.7071067811865475 + 0.0im)σᶻ₁]
  [(-0.7071067811865472 + 0.0im)σʸ₂ + (-0.7071067811865475 + 0.0im)σʸ₁]
  [(-0.7071067811865472 + 0.0im)σˣ₂ + (-0.7071067811865475 + 0.0im)σˣ₁]
@@ -63,121 +56,37 @@ bound</code></pre><pre class="documenter-example-output"><code class="nohighligh
     solver,
     symmetry = false,
 )
-@show bound</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-4.499999996479381</code></pre><p>Now with symmetry.</p><pre><code class="language-julia hljs">bound, gram, ν = hamiltonian_energy(
+@show bound</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-4.499999995399685</code></pre><p>Now with symmetry.</p><pre><code class="language-julia hljs">bound, gram, ν = hamiltonian_energy(
     3,
     2,
     solver,
 )
-@show bound</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-4.499999996767558</code></pre><p>Let&#39;s look at the isotypical basis.</p><pre><code class="language-julia hljs">display([M.basis.polynomials for M in ν.blocks])</code></pre><p>Now let&#39;s define a function for our common use case.</p><pre><code class="language-julia hljs">function f(L, d=1, consecutive=false; symmetry=true)
-    @show L
+@show bound</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-4.499999996767558</code></pre><p>Let&#39;s look at the isotypical basis.</p><pre><code class="language-julia hljs">[M.basis.polynomials for M in ν.blocks]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">10-element Vector{Vector{MultivariatePolynomials.VectorPolynomial{ComplexF64, MultivariatePolynomials.Term{ComplexF64, CondensedMatterSOS.SpinMonomial}}}}:
+ [(-0.5773502691896257 + 0.0im)σᶻ₃ + (-0.5773502691896257 + 0.0im)σᶻ₂ + (-0.5773502691896257 + 0.0im)σᶻ₁]
+ [(-0.5773502691896257 + 0.0im)σʸ₃ + (-0.5773502691896257 + 0.0im)σʸ₂ + (-0.5773502691896257 + 0.0im)σʸ₁]
+ [(-0.5773502691896257 + 0.0im)σˣ₃ + (-0.5773502691896257 + 0.0im)σˣ₂ + (-0.5773502691896257 + 0.0im)σˣ₁]
+ [(1.0 - 0.0im)]
+ [(-0.577350269189626 + 0.0im)σᶻ₃ + (0.2886751345948131 - 0.49999999999999994im)σᶻ₂ + (0.28867513459481275 + 0.5000000000000001im)σᶻ₁]
+ [(-0.577350269189626 + 0.0im)σʸ₃ + (0.2886751345948131 - 0.49999999999999994im)σʸ₂ + (0.28867513459481275 + 0.5000000000000001im)σʸ₁]
+ [(-0.577350269189626 + 0.0im)σˣ₃ + (0.2886751345948131 - 0.49999999999999994im)σˣ₂ + (0.28867513459481275 + 0.5000000000000001im)σˣ₁]
+ [(-0.577350269189626 + 0.0im)σᶻ₃ + (0.28867513459481275 + 0.5000000000000001im)σᶻ₂ + (0.2886751345948131 - 0.49999999999999994im)σᶻ₁]
+ [(-0.577350269189626 + 0.0im)σʸ₃ + (0.28867513459481275 + 0.5000000000000001im)σʸ₂ + (0.2886751345948131 - 0.49999999999999994im)σʸ₁]
+ [(-0.577350269189626 + 0.0im)σˣ₃ + (0.28867513459481275 + 0.5000000000000001im)σˣ₂ + (0.2886751345948131 - 0.49999999999999994im)σˣ₁]</code></pre><p>Now let&#39;s define a function for our common use case.</p><pre><code class="language-julia hljs">function f(N, d=1; verbose = 1, kws...)
+    @show N
     println(&quot;***&quot;)
     @show d
-    bound, gram, ν = @time hamiltonian_energy(
-        L,
-        2d,
-        solver,
-        consecutive=consecutive,
-        symmetry=symmetry,
-    )
+    bound, _, ν = @time hamiltonian_energy(N, 2d, solver; kws...)
     @show bound
-    for M in ν.blocks
-        display(round.(M.basis.polynomials, digits=6))
+    block_sizes = map(ν.blocks) do M
+        return length(M.basis.polynomials)
     end
-    println(&quot;E/N = &quot;, bound / L)
+    @show block_sizes
+    if verbose &gt;= 2
+        for M in ν.blocks
+            display(round.(M.basis.polynomials, digits=6))
+        end
+    end
+    println(&quot;E/N = &quot;, bound / N)
     println(&quot;------------------------------------&quot;)
-end
-
-f(6, 1, true)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">L = 6
-***
-d = 1
--------------------------------------------------------------
-           Clarabel.jl v0.6.0  -  Clever Acronym
-                   (c) Paul Goulart
-                University of Oxford, 2022
--------------------------------------------------------------
-
-problem:
-  variables     = 8
-  constraints   = 67
-  nnz(P)        = 0
-  nnz(A)        = 292
-  cones (total) = 8
-    : Zero        = 1,  numel = 46
-    : PSDTriangle = 7,  numel = (3,3,3,3,...,3)
-
-settings:
-  linear algebra: direct / qdldl, precision: Float64
-  max iter = 200, time limit = Inf,  max step = 0.990
-  tol_feas = 1.0e-08, tol_gap_abs = 1.0e-08, tol_gap_rel = 1.0e-08,
-  static reg : on, ϵ1 = 1.0e-08, ϵ2 = 4.9e-32
-  dynamic reg: on, ϵ = 1.0e-13, δ = 2.0e-07
-  iter refine: on, reltol = 1.0e-13, abstol = 1.0e-12,
-               max iter = 10, stop ratio = 5.0
-  equilibrate: on, min_scale = 1.0e-04, max_scale = 1.0e+04
-               max iter = 10
-
-iter    pcost        dcost       gap       pres      dres      k/t        μ       step
----------------------------------------------------------------------------------------------
-  0  -2.3418e-12   2.0510e-15  2.34e-12  5.06e-01  3.42e-01  1.00e+00  3.40e+00   ------
-  1   9.1182e+00   9.3357e+00  2.39e-02  1.68e-01  9.35e-02  5.30e-01  1.24e+00  7.44e-01
-  2   1.7367e+01   1.7455e+01  5.06e-03  1.95e-02  9.61e-03  1.33e-01  1.83e-01  9.90e-01
-  3   1.7994e+01   1.7995e+01  5.37e-05  2.03e-04  9.88e-05  1.45e-03  1.96e-03  9.89e-01
-  4   1.8000e+01   1.8000e+01  5.37e-07  2.02e-06  9.87e-07  1.45e-05  1.96e-05  9.90e-01
-  5   1.8000e+01   1.8000e+01  5.37e-09  2.02e-08  9.87e-09  1.45e-07  1.96e-07  9.90e-01
-  6   1.8000e+01   1.8000e+01  5.37e-11  2.02e-10  9.87e-11  1.45e-09  1.96e-09  9.90e-01
----------------------------------------------------------------------------------------------
-Terminated with status = solved
-solve time = 2.19ms
-  0.089261 seconds (300.30 k allocations: 26.398 MiB)
-bound = -17.999999993565496
-E/N = -2.9999999989275827
-------------------------------------</code></pre><p>Now with <code>d = 2</code>.</p><pre><code class="language-julia hljs">f(6, 2, true)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">L = 6
-***
-d = 2
--------------------------------------------------------------
-           Clarabel.jl v0.6.0  -  Clever Acronym
-                   (c) Paul Goulart
-                University of Oxford, 2022
--------------------------------------------------------------
-
-problem:
-  variables     = 46
-  constraints   = 895
-  nnz(P)        = 0
-  nnz(A)        = 10048
-  cones (total) = 25
-    : Zero        = 1,  numel = 774
-    : PSDTriangle = 24,  numel = (3,10,10,3,...,3)
-
-settings:
-  linear algebra: direct / qdldl, precision: Float64
-  max iter = 200, time limit = Inf,  max step = 0.990
-  tol_feas = 1.0e-08, tol_gap_abs = 1.0e-08, tol_gap_rel = 1.0e-08,
-  static reg : on, ϵ1 = 1.0e-08, ϵ2 = 4.9e-32
-  dynamic reg: on, ϵ = 1.0e-13, δ = 2.0e-07
-  iter refine: on, reltol = 1.0e-13, abstol = 1.0e-12,
-               max iter = 10, stop ratio = 5.0
-  equilibrate: on, min_scale = 1.0e-04, max_scale = 1.0e+04
-               max iter = 10
-
-iter    pcost        dcost       gap       pres      dres      k/t        μ       step
----------------------------------------------------------------------------------------------
-  0   1.4276e+00   1.4276e+00  0.00e+00  7.33e-01  5.97e-01  1.00e+00  2.30e+00   ------
-  1   5.3281e+00   5.3827e+00  1.02e-02  3.09e-01  1.64e-01  2.90e-01  7.52e-01  7.09e-01
-  2   1.0806e+01   1.0861e+01  5.08e-03  1.16e-01  6.06e-02  1.67e-01  3.67e-01  6.85e-01
-  3   9.6289e+00   9.6819e+00  5.50e-03  4.87e-02  4.24e-02  1.42e-01  2.89e-01  5.18e-01
-  4   1.1534e+01   1.1544e+01  8.23e-04  6.68e-03  5.87e-03  2.37e-02  4.69e-02  8.52e-01
-  5   1.1943e+01   1.1945e+01  1.84e-04  1.71e-03  1.43e-03  5.76e-03  1.18e-02  8.95e-01
-  6   1.1999e+01   1.1999e+01  2.92e-06  2.72e-05  2.29e-05  9.26e-05  1.91e-04  9.84e-01
-  7   1.2000e+01   1.2000e+01  1.34e-07  1.25e-06  1.05e-06  4.24e-06  8.76e-06  9.55e-01
-  8   1.2000e+01   1.2000e+01  3.89e-09  3.65e-08  3.06e-08  1.24e-07  2.56e-07  9.73e-01
-  9   1.2000e+01   1.2000e+01  3.89e-09  3.65e-08  3.06e-08  1.24e-07  2.56e-07  0.00e+00
----------------------------------------------------------------------------------------------
-Terminated with status = solved (reduced accuracy)
-solve time = 35.9ms
-┌ Warning: Termination status: ALMOST_OPTIMAL, ALMOST_SOLVED
-└ @ CondensedMatterSOS ~/work/CondensedMatterSOS.jl/CondensedMatterSOS.jl/src/sos.jl:39
-  0.607815 seconds (1.58 M allocations: 196.533 MiB, 12.09% gc time)
-bound = -11.999999696956051
-E/N = -1.9999999494926752
-------------------------------------</code></pre><table><tr><th style="text-align: right">id</th><th style="text-align: right">irep 1</th><th style="text-align: right">irep 2</th><th style="text-align: right">irep 3</th><th style="text-align: right">irep 4</th></tr><tr><td style="text-align: right">degree</td><td style="text-align: right">2</td><td style="text-align: right">3</td><td style="text-align: right">1</td><td style="text-align: right">3</td></tr><tr><td style="text-align: right">mult 2</td><td style="text-align: right">1</td><td style="text-align: right">3</td><td style="text-align: right">2</td><td style="text-align: right">1</td></tr><tr><td style="text-align: right">mult 3</td><td style="text-align: right">3</td><td style="text-align: right">6</td><td style="text-align: right">4</td><td style="text-align: right">3</td></tr><tr><td style="text-align: right">mult 4</td><td style="text-align: right">6</td><td style="text-align: right">10</td><td style="text-align: right">7</td><td style="text-align: right">6</td></tr><tr><td style="text-align: right">mult 5</td><td style="text-align: right">10</td><td style="text-align: right">15</td><td style="text-align: right">11</td><td style="text-align: right">10</td></tr><tr><td style="text-align: right">mult 6</td><td style="text-align: right">15</td><td style="text-align: right">21</td><td style="text-align: right">16</td><td style="text-align: right">15</td></tr><tr><td style="text-align: right">mult 7</td><td style="text-align: right">21</td><td style="text-align: right">28</td><td style="text-align: right">22</td><td style="text-align: right">21</td></tr></table><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../">« Introduction</a><a class="docs-footer-nextpage" href="../Glass/">Glass »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.25 on <span class="colophon-date" title="Tuesday 26 September 2023 12:42">Tuesday 26 September 2023</span>. Using Julia version 1.9.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+    return bound / N
+end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">f (generic function with 2 methods)</code></pre><p>With <code>d = 1</code>, we find a lower bound of <code>-3</code>:</p><pre><code class="language-julia hljs">lb = f(6, 1, consecutive = true, symmetry = true)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-2.9999999989275827</code></pre><p>Now with <code>d = 2</code>, we find <code>-2</code>:</p><pre><code class="language-julia hljs">lb = f(6, 2, consecutive = true, symmetry = true)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-1.9999999494926752</code></pre><table><tr><th style="text-align: right">id</th><th style="text-align: right">irep 1</th><th style="text-align: right">irep 2</th><th style="text-align: right">irep 3</th><th style="text-align: right">irep 4</th></tr><tr><td style="text-align: right">degree</td><td style="text-align: right">2</td><td style="text-align: right">3</td><td style="text-align: right">1</td><td style="text-align: right">3</td></tr><tr><td style="text-align: right">mult 2</td><td style="text-align: right">1</td><td style="text-align: right">3</td><td style="text-align: right">2</td><td style="text-align: right">1</td></tr><tr><td style="text-align: right">mult 3</td><td style="text-align: right">3</td><td style="text-align: right">6</td><td style="text-align: right">4</td><td style="text-align: right">3</td></tr><tr><td style="text-align: right">mult 4</td><td style="text-align: right">6</td><td style="text-align: right">10</td><td style="text-align: right">7</td><td style="text-align: right">6</td></tr><tr><td style="text-align: right">mult 5</td><td style="text-align: right">10</td><td style="text-align: right">15</td><td style="text-align: right">11</td><td style="text-align: right">10</td></tr><tr><td style="text-align: right">mult 6</td><td style="text-align: right">15</td><td style="text-align: right">21</td><td style="text-align: right">16</td><td style="text-align: right">15</td></tr><tr><td style="text-align: right">mult 7</td><td style="text-align: right">21</td><td style="text-align: right">28</td><td style="text-align: right">22</td><td style="text-align: right">21</td></tr></table><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../">« Introduction</a><a class="docs-footer-nextpage" href="../Glass/">Glass »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.25 on <span class="colophon-date" title="Wednesday 27 September 2023 15:18">Wednesday 27 September 2023</span>. Using Julia version 1.9.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
