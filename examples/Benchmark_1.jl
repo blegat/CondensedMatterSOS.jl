@@ -130,6 +130,11 @@ lb = f(6, 1, consecutive = true, symmetry = true)
 lb = f(6, 2, consecutive = true, symmetry = true)
 @test lb ≈ -2 #src
 
+# Now with `d = 3`, we find `-1.8685`:
+
+lb = f(6, 3, consecutive = true, symmetry = true)
+@test lb ≈ -1.8685 rtol = 1e-3 #src
+
 # | id     | irep 1 | irep 2 | irep 3 | irep 4 |
 # |--------|--------|--------|--------|--------|
 # | degree | 2      | 3      | 1      | 3      |
