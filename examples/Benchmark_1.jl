@@ -9,9 +9,10 @@ using Test #src
 using CondensedMatterSOS
 import MultivariatePolynomials as MP
 @spin σ[1:3]
+MP.monomials(σ[1], 0:2, consecutive=true)
 heisenberg_hamiltonian(σ, true)
 
-## Let's pick a solver from [this list](https://jump.dev/JuMP.jl/dev/installation/#Getting-Solvers).
+# Let's pick a solver from [this list](https://jump.dev/JuMP.jl/dev/installation/#Getting-Solvers).
 
 import Clarabel
 solver = Clarabel.Optimizer
@@ -20,23 +21,21 @@ solver = Clarabel.Optimizer
 
 function hamiltonian_energy(N, maxdegree, solver; symmetry=true, consecutive=false, kws...)
     @spin σ[1:N]
-    H = heisenberg_hamiltonian(σ, true)
     G = Lattice1Group(N)
-    cone = NonnegPolyInnerCone{MOI.HermitianPositiveSemidefiniteConeTriangle}()
     @assert iseven(maxdegree)
-    cert = SumOfSquares.Certificate.FixedBasis(
+    H = heisenberg_hamiltonian(σ, true)
+    cone = NonnegPolyInnerCone{MOI.HermitianPositiveSemidefiniteConeTriangle}()
+    certificate = SumOfSquares.Certificate.FixedBasis(
         cone,
         MonomialBasis(MP.monomials(σ[1], 0:div(maxdegree, 2), consecutive=consecutive)),
     )
-    certificate = Symmetry.Ideal(
-        Symmetry.Pattern(G, Action(σ)),
-        cert,
-    )
     if symmetry
-        energy(H, maxdegree, solver; certificate = certificate, kws...)
-    else
-        energy(H, maxdegree, solver; kws...)
+        certificate = Symmetry.Ideal(
+            Symmetry.Pattern(G, Action(σ)),
+            certificate,
+        )
     end
+    energy(H, maxdegree, solver; certificate, kws...)
 end
 bound, gram, ν = hamiltonian_energy(
     2,
@@ -70,8 +69,6 @@ bound
 # The reduction is obtained by block diagonalizing with a change of polynomial
 # basis to the isotypical basis.
 
-display([M.basis.polynomials for M in ν.blocks])
-
 @test length(ν.blocks) == 7 #src
 [M.basis.polynomials for M in ν.blocks]
 
@@ -98,34 +95,40 @@ bound, gram, ν = hamiltonian_energy(
 
 # Let's look at the isotypical basis.
 
-display([M.basis.polynomials for M in ν.blocks])
+@test length(ν.blocks) == 10 #src
+[M.basis.polynomials for M in ν.blocks]
 
 # Now let's define a function for our common use case.
 
-function f(L, d=1, consecutive=false; symmetry=true)
-    @show L
+function f(N, d=1; verbose = 1, kws...)
+    @show N
     println("***")
     @show d
-    bound, gram, ν = @time hamiltonian_energy(
-        L,
-        2d,
-        solver,
-        consecutive=consecutive,
-        symmetry=symmetry,
-    )
+    bound, _, ν = @time hamiltonian_energy(N, 2d, solver; kws...)
     @show bound
-    for M in ν.blocks
-        display(round.(M.basis.polynomials, digits=6))
+    block_sizes = map(ν.blocks) do M
+        return length(M.basis.polynomials)
     end
-    println("E/N = ", bound / L)
+    @show block_sizes
+    if verbose >= 2
+        for M in ν.blocks
+            display(round.(M.basis.polynomials, digits=6))
+        end
+    end
+    println("E/N = ", bound / N)
     println("------------------------------------")
+    return bound / N
 end
 
-f(6, 1, true)
+# With `d = 1`, we find a lower bound of `-3`:
 
-# Now with `d = 2`.
+lb = f(6, 1, consecutive = true, symmetry = true)
+@test lb ≈ -3 #src
 
-f(6, 2, true)
+# Now with `d = 2`, we find `-2`:
+
+lb = f(6, 2, consecutive = true, symmetry = true)
+@test lb ≈ -2 #src
 
 # | id     | irep 1 | irep 2 | irep 3 | irep 4 |
 # |--------|--------|--------|--------|--------|
