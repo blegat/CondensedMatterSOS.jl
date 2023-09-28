@@ -13,7 +13,7 @@ solver = Clarabel.Optimizer</code></pre><pre class="documenter-example-output"><
     energy(H, maxdegree, solver; kws...)
 end
 bound, gram, ν = hamiltonian_energy(2, 2, solver, sparsity = NoSparsity())
-bound</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-0.8031077005710335</code></pre><p>We can see that the moment matrix uses all monomials:</p><pre><code class="language-julia hljs">ν.basis.monomials</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">7-element Vector{CondensedMatterSOS.SpinMonomial}:
+bound</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-0.8031077005710117</code></pre><p>We can see that the moment matrix uses all monomials:</p><pre><code class="language-julia hljs">ν.basis.monomials</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">7-element Vector{CondensedMatterSOS.SpinMonomial}:
  1
  σᶻ₂
  σʸ₂
@@ -21,10 +21,10 @@ bound</code></pre><pre class="documenter-example-output"><code class="nohighligh
  σᶻ₁
  σʸ₁
  σˣ₁</code></pre><p>Using term sparsity with block/cluster completion, we get the same bound:</p><pre><code class="language-julia hljs">bound, gram, ν = hamiltonian_energy(2, 2, solver)
-bound</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-0.803107700726015</code></pre><p>But with a smaller basis:</p><pre><code class="language-julia hljs">[M.basis.monomials for M in ν.blocks]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">2-element Vector{Vector{CondensedMatterSOS.SpinMonomial}}:
+bound</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-0.8031077007260203</code></pre><p>But with a smaller basis:</p><pre><code class="language-julia hljs">[M.basis.monomials for M in ν.blocks]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">2-element Vector{Vector{CondensedMatterSOS.SpinMonomial}}:
  [1, σᶻ₂, σᶻ₁]
  [σʸ₂, σˣ₂, σʸ₁, σˣ₁]</code></pre><p>Using term sparsity with chordal completion, we get a smaller bound:</p><pre><code class="language-julia hljs">bound, gram, ν = hamiltonian_energy(2, 2, solver, sparsity = MonomialSparsity(ChordalCompletion()))
-bound</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-0.8705831380256343</code></pre><p>But with an even smaller basis:</p><pre><code class="language-julia hljs">[M.basis.monomials for M in ν.blocks]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">5-element Vector{Vector{CondensedMatterSOS.SpinMonomial}}:
+bound</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-0.8705831380256306</code></pre><p>But with an even smaller basis:</p><pre><code class="language-julia hljs">[M.basis.monomials for M in ν.blocks]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">5-element Vector{Vector{CondensedMatterSOS.SpinMonomial}}:
  [σʸ₁, σˣ₁]
  [σˣ₂, σˣ₁]
  [σʸ₂, σˣ₂]
@@ -36,7 +36,7 @@ hamiltonian(σ)</code></pre><p class="math-container">\[ (-0.4 + 0.0im)σᶻ_{2,
     energy(H, maxdegree, solver; kws...)
 end
 bound, gram, ν = hamiltonian_energy(2, 2, 2, solver, sparsity = NoSparsity())
-bound</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-4.152440484668461</code></pre><p>We can see that the moment matrix uses all monomials:</p><pre><code class="language-julia hljs">ν.basis.monomials</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">13-element Vector{CondensedMatterSOS.SpinMonomial}:
+bound</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-4.152440484668909</code></pre><p>We can see that the moment matrix uses all monomials:</p><pre><code class="language-julia hljs">ν.basis.monomials</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">13-element Vector{CondensedMatterSOS.SpinMonomial}:
  1
  σᶻ₂₋₂
  σʸ₂₋₂
@@ -50,10 +50,10 @@ bound</code></pre><pre class="documenter-example-output"><code class="nohighligh
  σᶻ₁₋₁
  σʸ₁₋₁
  σˣ₁₋₁</code></pre><p>Using term sparsity with block/cluster completion, we get the same bound:</p><pre><code class="language-julia hljs">bound, gram, ν = hamiltonian_energy(2, 2, 2, solver)
-bound</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-4.152440492510986</code></pre><p>But with a smaller basis:</p><pre><code class="language-julia hljs">[M.basis.monomials for M in ν.blocks]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">2-element Vector{Vector{CondensedMatterSOS.SpinMonomial}}:
+bound</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-4.152440492472815</code></pre><p>But with a smaller basis:</p><pre><code class="language-julia hljs">[M.basis.monomials for M in ν.blocks]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">2-element Vector{Vector{CondensedMatterSOS.SpinMonomial}}:
  [1, σᶻ₂₋₂, σᶻ₁₋₂, σᶻ₂₋₁, σᶻ₁₋₁]
  [σʸ₂₋₂, σˣ₂₋₂, σʸ₁₋₂, σˣ₁₋₂, σʸ₂₋₁, σˣ₂₋₁, σʸ₁₋₁, σˣ₁₋₁]</code></pre><p>Using term sparsity with chordal completion, we get a smaller bound:</p><pre><code class="language-julia hljs">bound, gram, ν = hamiltonian_energy(2, 2, 2, solver, sparsity = MonomialSparsity(ChordalCompletion()))
-bound</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-5.465903547590732</code></pre><p>But with an even smaller basis:</p><pre><code class="language-julia hljs">[M.basis.monomials for M in ν.blocks]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">9-element Vector{Vector{CondensedMatterSOS.SpinMonomial}}:
+bound</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-5.465903547590753</code></pre><p>But with an even smaller basis:</p><pre><code class="language-julia hljs">[M.basis.monomials for M in ν.blocks]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">9-element Vector{Vector{CondensedMatterSOS.SpinMonomial}}:
  [σˣ₁₋₂, σˣ₂₋₁, σˣ₁₋₁]
  [1, σᶻ₂₋₁, σᶻ₁₋₁]
  [σˣ₂₋₂, σˣ₁₋₂, σˣ₂₋₁]
@@ -62,4 +62,4 @@ bound</code></pre><pre class="documenter-example-output"><code class="nohighligh
  [σʸ₁₋₂, σˣ₁₋₂]
  [1, σᶻ₁₋₂]
  [σʸ₂₋₂, σˣ₂₋₂]
- [1, σᶻ₂₋₂]</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../Benchmark_1/">« Benchmark_1</a><a class="docs-footer-nextpage" href="../Ising/">Ising »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.25 on <span class="colophon-date" title="Wednesday 27 September 2023 15:18">Wednesday 27 September 2023</span>. Using Julia version 1.9.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+ [1, σᶻ₂₋₂]</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../Benchmark_1/">« Benchmark_1</a><a class="docs-footer-nextpage" href="../Ising/">Ising »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.25 on <span class="colophon-date" title="Thursday 28 September 2023 11:35">Thursday 28 September 2023</span>. Using Julia version 1.9.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
