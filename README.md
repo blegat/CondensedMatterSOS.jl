@@ -12,3 +12,5 @@
 [build-url]: https://travis-ci.com/github/blegat/CondensedMatterSOS.jl
 [codecov-img]: http://codecov.io/github/blegat/CondensedMatterSOS.jl/coverage.svg?branch=master
 [codecov-url]: http://codecov.io/github/blegat/CondensedMatterSOS.jl?branch=master
+
+Implementation of symmetry reduction for [this paper](https://doi.org/10.1103/PhysRevX.14.031006)
